@@ -1,0 +1,577 @@
+// Converted 1:1 from db.md — field names, enums and constraints preserved as-is.
+// No @@index added (unique constraints from db.md only).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum tipo_unidad {
+  rectorado
+  vicerrectorado
+  facultad
+  departamento
+  direccion
+  programa
+  otro
+}
+
+enum tipo_ubicacion {
+  campus
+  edificio
+  piso
+  ambiente
+}
+
+enum tipo_documento_adq {
+  factura
+  acta_donacion
+  contrato
+  convenio
+  sin_documento
+}
+
+enum origen_tipo {
+  propio
+  alquiler
+  comodato
+  convenio
+  prestamo_recibido
+}
+
+enum clase_bien {
+  activo
+  material
+}
+
+enum naturaleza_bien {
+  tangible
+  intangible
+}
+
+enum metodo_depreciacion {
+  lineal
+  saldo_decreciente
+}
+
+enum tipo_dato {
+  string
+  number
+  date
+  boolean
+}
+
+enum estado_bien {
+  en_registro
+  activo
+  fuera_de_servicio
+  en_prestamo
+  baja
+}
+
+enum estado_fisico {
+  excelente
+  muy_bueno
+  bueno
+  regular
+  malo
+}
+
+enum rol_usuario {
+  inventariador
+  supervisor
+  tecnico_contable
+  administrador
+  custodio
+  director
+}
+
+enum categoria_proceso {
+  alta
+  baja
+  movimiento
+  custodia
+  mantenimiento
+  regularizacion
+  prestamo
+}
+
+enum estado_tarea {
+  asignada
+  en_ejecucion
+  pausada
+  cerrada
+  cancelada
+}
+
+enum tipo_proceso_enum {
+  asignacion
+  traspaso
+  transferencia
+  devolucion
+  salida
+}
+
+enum etapa_proceso {
+  solicitud
+  autizacion
+  ejecucion
+  aceptacion
+  cierre
+  anulacion
+  rechazo
+}
+
+enum estado_movimiento {
+  solicitud
+  autorizado
+  ejecucion
+  aceptacion
+}
+
+enum estado_proceso {
+  pendiente
+  procesado
+  cerrado
+}
+
+enum estado_hoja_ruta {
+  pendiente
+  asiganda
+  en_ejecucion
+  pendiente_revision
+  en_revision
+  pendiente_reverificacion
+  conciliada
+  cerrada
+  cancelada
+}
+
+enum resultado_inspeccion {
+  localizado
+  no_localizado
+  sobrante
+  requiere_reverificacion
+}
+
+// Renombrado para no chocar con estado_fisico del núcleo
+enum estado_fisico_inventario {
+  excelente
+  muy_bueno
+  bueno
+  malo
+  regular
+  chatarra
+}
+
+enum estado_conciliacion {
+  pendiente
+  en_revision
+  aprobado
+  rechazado
+  requiere_reverificacion
+}
+
+enum tipo_documento {
+  adquisicion
+  operacion
+  asignacion
+  baja
+}
+
+model Persona {
+  id                  String  @id @default(uuid())
+  documento_identidad String  @unique @db.VarChar
+  nombre_completo     String  @db.VarChar
+  email               String? @db.VarChar
+  telefono            String? @db.VarChar
+
+  usuario                          Usuario?
+  unidades_organizacional          unidad_organizacional[] @relation("UnidadResponsable")
+  bienes_responsable               bien[]                  @relation("BienResponsable")
+  movimientos_responsable_origen   movimientos[]           @relation("MovResponsableOrigen")
+  movimientos_responsable_destino  movimientos[]           @relation("MovResponsableDestino")
+  registros_inventario_responsable registros_inventario[]  @relation("RegInvResponsableObservado")
+
+  @@map("persona")
+}
+
+model Usuario {
+  id         String      @id @default(uuid())
+  persona_id String?     @unique
+  email      String      @unique @db.VarChar
+  rol        rol_usuario
+  activo     Boolean     @default(true)
+  creado_en  DateTime    @default(now()) @db.Timestamptz(3)
+
+  persona                            Persona?               @relation(fields: [persona_id], references: [id])
+  tareas_creadas                     tarea[]                @relation("TareaCreadoPor")
+  tareas_supervisor                  tarea_supervisor[]     @relation("TareaSupervisorUsuario")
+  procesos_autorizados               procesos[]             @relation("ProcesoAutorizadoPor")
+  procesos_cerrados                  procesos[]             @relation("ProcesoCerradoPor")
+  hojas_ruta_asignadas               hojas_ruta[]           @relation("HojaRutaAsignadoA")
+  hojas_ruta_supervision             hojas_ruta[]           @relation("HojaRutaSupervisor")
+  registros_inventario_inventariador registros_inventario[] @relation("RegInvInventariador")
+  registros_inventario_supervisor    registros_inventario[] @relation("RegInvSupervisor")
+  evidencias_cargadas                evidencias[]           @relation("EvidenciaCargadoPor")
+  archivos_subidos                   archivo[]              @relation("ArchivoSubidoPor")
+  documentos_subidos                 documento[]            @relation("DocumentoSubidoPor")
+
+  @@map("usuario")
+}
+
+model unidad_organizacional {
+  id             String      @id @default(uuid())
+  padre_id       String?
+  codigo         String      @unique @db.VarChar
+  nombre         String      @db.VarChar
+  tipo           tipo_unidad
+  responsable_id String
+
+  padre                       unidad_organizacional?  @relation("UnidadPadre", fields: [padre_id], references: [id])
+  hijos                       unidad_organizacional[] @relation("UnidadPadre")
+  responsable                 Persona                 @relation("UnidadResponsable", fields: [responsable_id], references: [id])
+  ubicaciones                 ubicacion[]
+  bienes                      bien[]                  @relation("BienUnidad")
+  bienes_unidad_costo         bien[]                  @relation("BienUnidadCosto")
+  hojas_ruta                  hojas_ruta[]            @relation("HojaRutaUnidad")
+  hojas_ruta_unidad_costo     hojas_ruta[]            @relation("HojaRutaUnidadCosto")
+  movimientos_unidad_origen   movimientos[]           @relation("MovUnidadOrigen")
+  movimientos_unidad_destino  movimientos[]           @relation("MovUnidadDestino")
+  registros_inventario_unidad registros_inventario[]  @relation("RegInvUnidadObservada")
+
+  @@map("unidad_organizacional")
+}
+
+model ubicacion {
+  id        String         @id @default(uuid())
+  codigo    String?        @unique @db.VarChar
+  nombre    String         @db.VarChar
+  tipo      tipo_ubicacion
+  unidad_id String?
+  latitud   Decimal?       @db.Decimal
+  longitud  Decimal?       @db.Decimal
+
+  unidad                         unidad_organizacional? @relation(fields: [unidad_id], references: [id])
+  movimientos_ubicacion_origen   movimientos[]          @relation("MovUbicacionOrigen")
+  movimientos_ubicacion_destino  movimientos[]          @relation("MovUbicacionDestino")
+  hojas_ruta                     hojas_ruta[]
+  registros_inventario_ubicacion registros_inventario[] @relation("RegInvUbicacionObservada")
+
+  @@map("ubicacion")
+}
+
+model codificador {
+  id                  String               @id @default(uuid())
+  codigo              String               @unique @db.VarChar
+  nombre              String               @db.VarChar
+  clase               clase_bien
+  naturaleza          naturaleza_bien
+  depreciable         Boolean              @default(false)
+  tasa_depreciacion   Decimal?             @db.Decimal
+  vida_util_meses     Int?
+  metodo_depreciacion metodo_depreciacion?
+  cuenta_contable     String?              @db.VarChar
+
+  bienes bien[]
+
+  @@map("codificador")
+}
+
+model bien {
+  id                         String             @id @default(uuid())
+  codificador_id             String
+  padre_id                   String?
+  numero                     Int                @unique
+  descripcion                String             @db.VarChar
+  unidad_id                  String
+  responsable_id             String
+  patrimonial                Boolean            @default(false)
+  valor_original             Decimal?           @db.Decimal
+  estado                     estado_bien        @default(en_registro)
+  estado_fisico_inicial      estado_fisico?
+  estado_fisico              estado_fisico?
+  unidad_costo_id            String
+  fecha_alta                 DateTime           @db.Date
+  adquisicion_tipo_documento tipo_documento_adq
+  adquisicion_nro_documento  String?            @db.VarChar
+  fecha_adquisicion          DateTime           @db.Date
+  origen_nombre              String?            @db.VarChar
+  origen_tipo                origen_tipo?
+
+  codificador  codificador           @relation(fields: [codificador_id], references: [id])
+  padre        bien?                 @relation("BienPadre", fields: [padre_id], references: [id])
+  hijos        bien[]                @relation("BienPadre")
+  unidad       unidad_organizacional @relation("BienUnidad", fields: [unidad_id], references: [id])
+  responsable  Persona               @relation("BienResponsable", fields: [responsable_id], references: [id])
+  unidad_costo unidad_organizacional @relation("BienUnidadCosto", fields: [unidad_costo_id], references: [id])
+
+  movimientos          movimientos[]
+  bienes_hoja_ruta     bienes_hoja_ruta[]
+  registros_inventario registros_inventario[]
+  documentos           documento[]
+
+  @@map("bien")
+}
+
+model tarea {
+  id                 String            @id @default(uuid())
+  nombre             String            @db.VarChar(100)
+  descripcion        String?
+  estado             estado_tarea
+  categoria          categoria_proceso
+  creado_por_id      String
+  fecha_inicio       DateTime          @default(now()) @db.Timestamptz(3)
+  fecha_finalizacion DateTime?         @db.Timestamptz(3)
+  deriva_en_procesos Boolean?
+  gestion            Int
+
+  creado_por         Usuario            @relation("TareaCreadoPor", fields: [creado_por_id], references: [id])
+  procesos           procesos[]
+  hojas_ruta         hojas_ruta[]
+  tarea_supervisores tarea_supervisor[]
+  documentos         documento[]
+
+  @@map("tarea")
+}
+
+model tarea_supervisor {
+  id               String   @id @default(uuid())
+  tarea_id         String
+  usuario_id       String
+  fecha_asignacion DateTime @default(now()) @db.Timestamptz(3)
+  rol              String?  @db.VarChar(20)
+
+  tarea   tarea   @relation(fields: [tarea_id], references: [id])
+  usuario Usuario @relation("TareaSupervisorUsuario", fields: [usuario_id], references: [id])
+
+  @@map("tarea_supervisor")
+}
+
+model TipoProcesoCatalog {
+  id                           String            @id @default(uuid())
+  codigo                       String            @unique @db.VarChar(30)
+  nombre                       String            @db.VarChar(150)
+  categoria                    categoria_proceso
+  requiere_autorizacion        Boolean           @default(false)
+  requiere_ejecucion_campo     Boolean           @default(false)
+  requiere_aceptacion_custodia Boolean           @default(false)
+  genera_formulario            Boolean           @default(true)
+  genera_movimiento            Boolean           @default(true)
+  afecta_patrimonio            Boolean           @default(false)
+  afecta_depreciacion          Boolean           @default(false)
+
+  procesos procesos[]
+
+  @@map("tipo_proceso")
+}
+
+model procesos {
+  id                 String         @id @default(uuid())
+  tarea_id           String
+  estado             estado_proceso
+  codigo             String?        @db.VarChar(30)
+  tipo_proceso_id    String
+  autorizado_por_id  String?
+  fecha_autorizacion DateTime?      @default(now()) @db.Timestamptz(3)
+  cerrado_por        String?
+  fecha_cierre       DateTime?      @db.Timestamptz(3)
+  descripcion        String?
+  observaciones      String?
+
+  tarea               tarea              @relation(fields: [tarea_id], references: [id])
+  tipo_proceso        TipoProcesoCatalog @relation(fields: [tipo_proceso_id], references: [id])
+  autorizado_por      Usuario?           @relation("ProcesoAutorizadoPor", fields: [autorizado_por_id], references: [id])
+  cerrado_por_usuario Usuario?           @relation("ProcesoCerradoPor", fields: [cerrado_por], references: [id])
+
+  movimientos movimientos[]
+  documentos  documento[]
+
+  @@map("procesos")
+}
+
+model movimientos {
+  id                     String  @id @default(uuid())
+  proceso_id             String
+  bien_id                String
+  unidad_origen_id       String?
+  ubicacion_origen_id    String?
+  responsable_origen_id  String?
+  unidad_destino_id      String?
+  ubicacion_destino_id   String?
+  responsable_destino_id String?
+  motivo                 String?
+  observaciones          String?
+
+  proceso procesos @relation(fields: [proceso_id], references: [id])
+  bien    bien     @relation(fields: [bien_id], references: [id])
+
+  unidad_origen      unidad_organizacional? @relation("MovUnidadOrigen", fields: [unidad_origen_id], references: [id])
+  ubicacion_origen   ubicacion?             @relation("MovUbicacionOrigen", fields: [ubicacion_origen_id], references: [id])
+  responsable_origen Persona?               @relation("MovResponsableOrigen", fields: [responsable_origen_id], references: [id])
+
+  unidad_destino      unidad_organizacional? @relation("MovUnidadDestino", fields: [unidad_destino_id], references: [id])
+  ubicacion_destino   ubicacion?             @relation("MovUbicacionDestino", fields: [ubicacion_destino_id], references: [id])
+  responsable_destino Persona?               @relation("MovResponsableDestino", fields: [responsable_destino_id], references: [id])
+
+  detalles_salida_temporal detalles_salida_temporal?
+
+  @@map("movimientos")
+}
+
+model detalles_salida_temporal {
+  movimiento_id    String    @id
+  fecha_solicitud  DateTime? @db.Timestamptz(3)
+  fecha_efectiva   DateTime? @db.Timestamptz(3)
+  fecha_devolucion DateTime? @db.Timestamptz(3)
+
+  movimiento movimientos @relation(fields: [movimiento_id], references: [id])
+
+  @@map("detalles_salida_temporal")
+}
+
+model hojas_ruta {
+  id                   String           @id @default(uuid())
+  tarea_id             String
+  codigo               String           @db.VarChar(50)
+  nombre               String           @db.VarChar(150)
+  descripcion          String?
+  unidad_id            String?
+  ubicacion_id         String?
+  unidad_costo_id      String?
+  estado               estado_hoja_ruta
+  fecha_inicio         DateTime?        @db.Timestamptz(3)
+  fecha_envio_revision DateTime?        @db.Timestamptz(3)
+  fecha_conciliacion   DateTime?        @db.Timestamptz(3)
+  fecha_cierre         DateTime?        @db.Timestamptz(3)
+  asignado_a_id        String?
+  supervisor_id        String?
+  observaciones        String?
+  creado_en            DateTime?        @db.Timestamptz(3)
+  actualizado_en       DateTime?        @db.Timestamptz(3)
+
+  tarea        tarea                  @relation(fields: [tarea_id], references: [id])
+  unidad       unidad_organizacional? @relation("HojaRutaUnidad", fields: [unidad_id], references: [id])
+  ubicacion    ubicacion?             @relation(fields: [ubicacion_id], references: [id])
+  unidad_costo unidad_organizacional? @relation("HojaRutaUnidadCosto", fields: [unidad_costo_id], references: [id])
+  asignado_a   Usuario?               @relation("HojaRutaAsignadoA", fields: [asignado_a_id], references: [id])
+  supervisor   Usuario?               @relation("HojaRutaSupervisor", fields: [supervisor_id], references: [id])
+
+  bienes_hoja_ruta     bienes_hoja_ruta[]
+  registros_inventario registros_inventario[]
+
+  @@map("hojas_ruta")
+}
+
+model bienes_hoja_ruta {
+  id            String    @id @default(uuid())
+  hoja_ruta_id  String
+  bien_id       String
+  estado        String    @db.VarChar(30)
+  agregado_en   DateTime? @db.Timestamptz(3)
+  observaciones String?
+
+  hoja_ruta            hojas_ruta             @relation(fields: [hoja_ruta_id], references: [id])
+  bien                 bien                   @relation(fields: [bien_id], references: [id])
+  registros_inventario registros_inventario[]
+
+  @@map("bienes_hoja_ruta")
+}
+
+model registros_inventario {
+  id                       String                    @id @default(uuid())
+  hoja_ruta_id             String
+  bien_hoja_ruta_id        String?
+  bien_id                  String?
+  codigo_leido             String?                   @db.VarChar(100)
+  resultado                resultado_inspeccion
+  estado_fisico_observado  estado_fisico_inventario?
+  unidad_observada_id      String?
+  ubicacion_observada_id   String?
+  responsable_observado_id String?
+  latitud                  Decimal?                  @db.Decimal(10, 7)
+  longitud                 Decimal?                  @db.Decimal(10, 7)
+  inventariador_id         String
+  fecha_inspeccion         DateTime                  @db.Timestamptz(3)
+  observaciones            String?
+  supervisor_id            String?
+  fecha_revision           DateTime?                 @db.Timestamptz(3)
+  comentario_revision      String?
+  creado_en                DateTime?                 @db.Timestamptz(3)
+  actualizado_en           DateTime?                 @db.Timestamptz(3)
+
+  hoja_ruta             hojas_ruta             @relation(fields: [hoja_ruta_id], references: [id])
+  bien_hoja_ruta        bienes_hoja_ruta?      @relation(fields: [bien_hoja_ruta_id], references: [id])
+  bien                  bien?                  @relation(fields: [bien_id], references: [id])
+  unidad_observada      unidad_organizacional? @relation("RegInvUnidadObservada", fields: [unidad_observada_id], references: [id])
+  ubicacion_observada   ubicacion?             @relation("RegInvUbicacionObservada", fields: [ubicacion_observada_id], references: [id])
+  responsable_observado Persona?               @relation("RegInvResponsableObservado", fields: [responsable_observado_id], references: [id])
+  inventariador         Usuario                @relation("RegInvInventariador", fields: [inventariador_id], references: [id])
+  supervisor            Usuario?               @relation("RegInvSupervisor", fields: [supervisor_id], references: [id])
+
+  evidencias evidencias[]
+  documentos documento[]
+
+  @@map("registros_inventario")
+}
+
+model evidencias {
+  id                     String    @id @default(uuid())
+  registro_inventario_id String
+  nombre_archivo         String?   @db.VarChar(255)
+  ruta                   String    @db.VarChar(500)
+  fecha_captura          DateTime? @db.Timestamptz(3)
+  cargado_por_id         String?
+  creado_en              DateTime? @db.Timestamptz(3)
+
+  registro_inventario registros_inventario @relation(fields: [registro_inventario_id], references: [id])
+  cargado_por         Usuario?             @relation("EvidenciaCargadoPor", fields: [cargado_por_id], references: [id])
+
+  @@map("evidencias")
+}
+
+model archivo {
+  id                  String   @id @default(uuid())
+  nombre_original     String   @db.VarChar(255)
+  mime_type           String   @db.VarChar(100)
+  tamano_bytes        BigInt
+  ruta_almacenamiento String   @db.VarChar(500)
+  hash_sha256         String   @unique @db.VarChar(64)
+  subido_por          String
+  subido_en           DateTime @default(now()) @db.Timestamptz(3)
+
+  subido_por_usuario Usuario     @relation("ArchivoSubidoPor", fields: [subido_por], references: [id])
+  documentos         documento[]
+
+  @@map("archivo")
+}
+
+model documento {
+  id                     String         @id @default(uuid())
+  archivo_id             String
+  tipo                   tipo_documento
+  descripcion            String?
+  activo                 Boolean        @default(true)
+  bien_id                String?
+  proceso_id             String?
+  tarea_id               String?
+  registro_inventario_id String?
+  nro_documento          String?        @db.VarChar(100)
+  fecha_documento        DateTime?      @db.Date
+  es_principal           Boolean        @default(false)
+  subido_por             String
+  subido_en              DateTime       @default(now()) @db.Timestamptz(3)
+
+  archivo             archivo               @relation(fields: [archivo_id], references: [id])
+  bien                bien?                 @relation(fields: [bien_id], references: [id])
+  proceso             procesos?             @relation(fields: [proceso_id], references: [id])
+  tarea               tarea?                @relation(fields: [tarea_id], references: [id])
+  registro_inventario registros_inventario? @relation(fields: [registro_inventario_id], references: [id])
+  subido_por_usuario  Usuario               @relation("DocumentoSubidoPor", fields: [subido_por], references: [id])
+
+  @@map("documento")
+}
