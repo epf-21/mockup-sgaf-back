@@ -9,4 +9,19 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
+
+  @Get('codificadores')
+  getCodificadoresResumen() {
+    return this.appService.getCodificadoresResumen();
+  }
+
+  @Get('codificadores/detalle')
+  getCodificadores() {
+    return this.appService.getCodificadores();
+  }
+
+  @Get('codificadores/atributos')
+  getCodificadoresAtributos() {
+    return this.appService.getCodificadoresAtributos();
+  }
 }
