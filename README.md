@@ -41,6 +41,18 @@ docker compose up -d database
 
 ## Configurar Prisma
 
+Carga los datos demo de unidades organizacionales y usuarios:
+
+```bash
+bun run db:seed:unidades
+bun run db:seed:usuarios
+bun run db:seed:personas
+```
+
+Los usuarios creados pertenecen a los roles `inventariador`, `supervisor` y
+`administrador`. Los seeds son repetibles y actualizan los registros demo si
+ya existen.
+
 Aplica las migraciones existentes en la base de datos:
 
 ```bash
@@ -72,6 +84,20 @@ Para consultar la base de datos mediante la interfaz de Prisma:
 ```bash
 bunx prisma studio
 ```
+
+## Endpoints disponibles
+
+Con NestJS ejecutándose en `http://localhost:3000`:
+
+```text
+GET /unidades
+GET /usuarios
+GET /personas
+```
+
+`GET /unidades` devuelve únicamente `id` y `nombre`. `GET /usuarios` devuelve
+`id`, `nombre` y `rol` de los usuarios demo activos. `GET /personas` devuelve
+`id` y `nombre` de todas las personas registradas.
 
 ## Ejecutar NestJS
 
@@ -121,6 +147,13 @@ bun run test:cov
 # Linter y formato
 bun run lint
 bun run format
+```
+
+## Para ejecutar los seeders
+
+```bash
+bun run db:seed
+
 ```
 
 ## Estructura relevante

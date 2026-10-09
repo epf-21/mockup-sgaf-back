@@ -59,4 +59,57 @@ export class AppService {
       atributos: atributosPorCodigo.get(c.codigo) ?? [],
     }));
   }
+
+  async getUnidades() {
+    return this.prisma.unidad_organizacional.findMany({
+      select: {
+        id: true,
+        nombre: true,
+      },
+      orderBy: { nombre: 'asc' },
+    });
+  }
+
+  async getUsuarios() {
+    const usuarios = await this.prisma.usuario.findMany({
+      where: {
+        activo: true,
+        rol: {
+          in: ['inventariador', 'supervisor', 'administrador'],
+        },
+      },
+      select: {
+        id: true,
+        rol: true,
+        email: true,
+        persona: {
+          select: {
+            nombre_completo: true,
+          },
+        },
+      },
+      orderBy: { persona: { nombre_completo: 'asc' } },
+    });
+
+    return usuarios.map(({ id, rol, email, persona }) => ({
+      id,
+      nombre: persona?.nombre_completo ?? email,
+      rol,
+    }));
+  }
+
+  async getPersonas() {
+    const personas = await this.prisma.persona.findMany({
+      select: {
+        id: true,
+        nombre_completo: true,
+      },
+      orderBy: { nombre_completo: 'asc' },
+    });
+
+    return personas.map(({ id, nombre_completo }) => ({
+      id,
+      nombre: nombre_completo,
+    }));
+  }
 }

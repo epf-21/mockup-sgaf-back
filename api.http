@@ -12,3 +12,20 @@ Accept: application/json
 GET http://localhost:3000/codificadores/atributos
 Content-Type: application/json
 Accept: application/json
+
+###
+GET http://localhost:3000/unidades
+Content-Type: application/json
+Accept: application/json
+
+
+###
+GET http://localhost:3000/usuarios
+Content-Type: application/json
+Accept: application/json
+
+###
+GET http://localhost:3000/personas
+Content-Type: application/json
+Accept: application/json
+

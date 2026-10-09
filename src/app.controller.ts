@@ -24,4 +24,19 @@ export class AppController {
   getCodificadoresAtributos() {
     return this.appService.getCodificadoresAtributos();
   }
+
+  @Get('unidades')
+  getUnidades() {
+    return this.appService.getUnidades();
+  }
+
+  @Get('usuarios')
+  getUsuarios() {
+    return this.appService.getUsuarios();
+  }
+
+  @Get('personas')
+  getPersonas() {
+    return this.appService.getPersonas();
+  }
 }
