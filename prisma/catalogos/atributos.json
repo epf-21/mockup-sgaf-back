@@ -1,0 +1,374 @@
+{
+  "codificadores": [
+    {
+      "codigo": "2.1.3.01",
+      "atributos": [
+        {
+          "codigo": "marca",
+          "nombre": "Marca",
+          "tipo_dato": "string",
+          "obligatorio": true
+        },
+        {
+          "codigo": "modelo",
+          "nombre": "Modelo",
+          "tipo_dato": "string",
+          "obligatorio": true
+        },
+        {
+          "codigo": "serie",
+          "nombre": "Número de Serie",
+          "tipo_dato": "string",
+          "obligatorio": true
+        },
+        {
+          "codigo": "ram_gb",
+          "nombre": "Memoria RAM (GB)",
+          "tipo_dato": "number",
+          "obligatorio": false
+        },
+        {
+          "codigo": "nucleos",
+          "nombre": "Núcleos CPU",
+          "tipo_dato": "number",
+          "obligatorio": false
+        },
+        {
+          "codigo": "so",
+          "nombre": "Sistema Operativo",
+          "tipo_dato": "string",
+          "obligatorio": false
+        },
+        {
+          "codigo": "tipo_ram",
+          "nombre": "Tipo de RAM",
+          "tipo_dato": "string",
+          "obligatorio": false
+        },
+        {
+          "codigo": "estado_fisico",
+          "nombre": "Estado físico inicial",
+          "tipo_dato": "enum",
+          "obligatorio": true
+        }
+      ]
+    },
+    {
+      "codigo": "2.1.3.03",
+      "atributos": [
+        {
+          "codigo": "marca",
+          "nombre": "Marca",
+          "tipo_dato": "string",
+          "obligatorio": true
+        },
+        {
+          "codigo": "modelo",
+          "nombre": "Modelo",
+          "tipo_dato": "string",
+          "obligatorio": false
+        },
+        {
+          "codigo": "serie",
+          "nombre": "Número de Serie",
+          "tipo_dato": "string",
+          "obligatorio": false
+        },
+        {
+          "codigo": "capacidad_gb",
+          "nombre": "Capacidad (GB)",
+          "tipo_dato": "number",
+          "obligatorio": false
+        },
+        {
+          "codigo": "estado_fisico",
+          "nombre": "Estado físico inicial",
+          "tipo_dato": "enum",
+          "obligatorio": true
+        }
+      ]
+    },
+    {
+      "codigo": "2.1.5.01",
+      "atributos": [
+        {
+          "codigo": "marca",
+          "nombre": "Marca",
+          "tipo_dato": "string",
+          "obligatorio": true
+        },
+        {
+          "codigo": "modelo",
+          "nombre": "Modelo",
+          "tipo_dato": "string",
+          "obligatorio": true
+        },
+        {
+          "codigo": "serie",
+          "nombre": "Número de Serie",
+          "tipo_dato": "string",
+          "obligatorio": false
+        },
+        {
+          "codigo": "matricula",
+          "nombre": "Matrícula",
+          "tipo_dato": "string",
+          "obligatorio": true
+        },
+        {
+          "codigo": "kilometraje",
+          "nombre": "Kilometraje (Km)",
+          "tipo_dato": "number",
+          "obligatorio": false
+        },
+        {
+          "codigo": "estado_fisico",
+          "nombre": "Estado físico inicial",
+          "tipo_dato": "enum",
+          "obligatorio": true
+        }
+      ]
+    },
+    {
+      "codigo": "3.1.0.01",
+      "atributos": [
+        {
+          "codigo": "superficie_m2",
+          "nombre": "Superficie (m²)",
+          "tipo_dato": "number",
+          "obligatorio": true
+        },
+        {
+          "codigo": "matricula",
+          "nombre": "Matrícula",
+          "tipo_dato": "string",
+          "obligatorio": true
+        }
+      ]
+    },
+    {
+      "codigo": "4.1.0.01",
+      "atributos": [
+        {
+          "codigo": "marca",
+          "nombre": "Marca",
+          "tipo_dato": "string",
+          "obligatorio": true
+        },
+        {
+          "codigo": "nro_licencia",
+          "nombre": "Nro Licencia",
+          "tipo_dato": "string",
+          "obligatorio": true
+        },
+        {
+          "codigo": "fecha_vencimiento",
+          "nombre": "Fecha Vencimiento",
+          "tipo_dato": "date",
+          "obligatorio": true
+        }
+      ]
+    },
+    {
+      "codigo": "5.1.0.01",
+      "atributos": [
+        {
+          "codigo": "marca",
+          "nombre": "Marca",
+          "tipo_dato": "string",
+          "obligatorio": false
+        },
+        {
+          "codigo": "presentacion",
+          "nombre": "Presentación",
+          "tipo_dato": "string",
+          "obligatorio": false
+        }
+      ]
+    },
+    {
+      "codigo": "2.1.3.05",
+      "atributos": [
+        {
+          "codigo": "marca",
+          "nombre": "Marca",
+          "tipo_dato": "string",
+          "obligatorio": true
+        },
+        {
+          "codigo": "modelo",
+          "nombre": "Modelo",
+          "tipo_dato": "string",
+          "obligatorio": false
+        },
+        {
+          "codigo": "serie",
+          "nombre": "Número de Serie",
+          "tipo_dato": "string",
+          "obligatorio": false
+        },
+        {
+          "codigo": "pulgadas",
+          "nombre": "Pulgadas",
+          "tipo_dato": "number",
+          "obligatorio": false
+        }
+      ]
+    },
+    {
+      "codigo": "2.1.3.06",
+      "atributos": [
+        {
+          "codigo": "marca",
+          "nombre": "Marca",
+          "tipo_dato": "string",
+          "obligatorio": true
+        },
+        {
+          "codigo": "modelo",
+          "nombre": "Modelo",
+          "tipo_dato": "string",
+          "obligatorio": false
+        },
+        {
+          "codigo": "serie",
+          "nombre": "Número de Serie",
+          "tipo_dato": "string",
+          "obligatorio": false
+        }
+      ]
+    },
+    {
+      "codigo": "2.1.3.07",
+      "atributos": [
+        {
+          "codigo": "marca",
+          "nombre": "Marca",
+          "tipo_dato": "string",
+          "obligatorio": true
+        },
+        {
+          "codigo": "modelo",
+          "nombre": "Modelo",
+          "tipo_dato": "string",
+          "obligatorio": false
+        },
+        {
+          "codigo": "serie",
+          "nombre": "Número de Serie",
+          "tipo_dato": "string",
+          "obligatorio": false
+        }
+      ]
+    },
+    {
+      "codigo": "2.1.6.01",
+      "atributos": [
+        {
+          "codigo": "marca",
+          "nombre": "Marca",
+          "tipo_dato": "string",
+          "obligatorio": true
+        },
+        {
+          "codigo": "modelo",
+          "nombre": "Modelo",
+          "tipo_dato": "string",
+          "obligatorio": false
+        },
+        {
+          "codigo": "serie",
+          "nombre": "Número de Serie",
+          "tipo_dato": "string",
+          "obligatorio": false
+        },
+        {
+          "codigo": "pulgadas",
+          "nombre": "Pulgadas",
+          "tipo_dato": "number",
+          "obligatorio": false
+        },
+        {
+          "codigo": "modelo",
+          "nombre": "Modelo",
+          "tipo_dato": "string",
+          "obligatorio": false
+        },
+        {
+          "codigo": "serie",
+          "nombre": "Número de Serie",
+          "tipo_dato": "string",
+          "obligatorio": false
+        }
+      ]
+    },
+    {
+      "codigo": "3.2.0.01",
+      "atributos": [
+        {
+          "codigo": "superficie_m2",
+          "nombre": "Superficie (m²)",
+          "tipo_dato": "number",
+          "obligatorio": true
+        },
+        {
+          "codigo": "matricula",
+          "nombre": "Matrícula",
+          "tipo_dato": "string",
+          "obligatorio": false
+        }
+      ]
+    },
+    {
+      "codigo": "5.2.0.01",
+      "atributos": [
+        {
+          "codigo": "material",
+          "nombre": "Material",
+          "tipo_dato": "string",
+          "obligatorio": true
+        },
+        {
+          "codigo": "color",
+          "nombre": "Color",
+          "tipo_dato": "string",
+          "obligatorio": false
+        }
+      ]
+    },
+    {
+      "codigo": "5.2.0.02",
+      "atributos": [
+        {
+          "codigo": "material",
+          "nombre": "Material",
+          "tipo_dato": "string",
+          "obligatorio": true
+        },
+        {
+          "codigo": "color",
+          "nombre": "Color",
+          "tipo_dato": "string",
+          "obligatorio": false
+        }
+      ]
+    },
+    {
+      "codigo": "6.1.0.01",
+      "atributos": [
+        {
+          "codigo": "material",
+          "nombre": "Material",
+          "tipo_dato": "string",
+          "obligatorio": true
+        },
+        {
+          "codigo": "color",
+          "nombre": "Color",
+          "tipo_dato": "string",
+          "obligatorio": false
+        }
+      ]
+    }
+  ]
+}

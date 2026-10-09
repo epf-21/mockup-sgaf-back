@@ -302,6 +302,7 @@ model bien {
   fecha_adquisicion          DateTime           @db.Date
   origen_nombre              String?            @db.VarChar
   origen_tipo                origen_tipo?
+  atributos                  String?            @db.Text
 
   codificador  codificador           @relation(fields: [codificador_id], references: [id])
   padre        bien?                 @relation("BienPadre", fields: [padre_id], references: [id])
