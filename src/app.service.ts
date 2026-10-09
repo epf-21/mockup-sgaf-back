@@ -1,36 +1,19 @@
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { Prisma } from 'src/generated/prisma/client';
 import { PrismaService } from './database/prisma.service';
-
-export interface AtributoCatalogo {
-  codigo: string;
-  nombre: string;
-  tipo_dato: string;
-  unidad_medida?: string;
-  obligatorio: boolean;
-  orden: number;
-}
-
-export interface CodificadorCatalogo {
-  codigo: string;
-  atributos: AtributoCatalogo[];
-}
+import { BienValidator, type BienCreateData } from './bienes/bienes.validator';
+import { CrearBienBody } from './bienes/bienes.types';
 
 @Injectable()
 export class AppService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly bienValidator: BienValidator;
+
+  constructor(private readonly prisma: PrismaService) {
+    this.bienValidator = new BienValidator(prisma);
+  }
 
   getHello(): string {
     return 'Hello World!';
-  }
-
-  private leerCatalogoAtributos(): Map<string, AtributoCatalogo[]> {
-    const ruta = join(process.cwd(), 'prisma', 'catalogos', 'atributos.json');
-    const catalogo = JSON.parse(readFileSync(ruta, 'utf-8')) as {
-      codificadores: CodificadorCatalogo[];
-    };
-    return new Map(catalogo.codificadores.map((c) => [c.codigo, c.atributos]));
   }
 
   async getCodificadoresResumen() {
@@ -111,5 +94,64 @@ export class AppService {
       id,
       nombre: nombre_completo,
     }));
+  }
+
+  async crearBien(body: CrearBienBody) {
+    const padre = await this.bienValidator.validateParent(body);
+    const componentes = body.componentes ?? [];
+
+    const componentesValidados: BienCreateData[] = [];
+    for (const [index, componente] of componentes.entries()) {
+      componentesValidados.push(
+        await this.bienValidator.validateComponent(componente, index, {
+          unidad_id: padre.unidad_id,
+          responsable_id: padre.responsable_id,
+          ubicacion: padre.ubicacion ?? null,
+        }),
+      );
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const bienPadre = await tx.bien.create({
+        data: {
+          ...padre,
+          numero: await this.generarNumero(tx),
+        },
+      });
+
+      const bienesComponentes: Prisma.bienGetPayload<object>[] = [];
+      for (const componente of componentesValidados) {
+        bienesComponentes.push(
+          await tx.bien.create({
+            data: {
+              ...componente,
+              padre_id: bienPadre.id,
+              numero: await this.generarNumero(tx),
+            },
+          }),
+        );
+      }
+
+      return {
+        ...bienPadre,
+        componentes: bienesComponentes,
+      };
+    });
+  }
+
+  private leerCatalogoAtributos() {
+    return this.bienValidator.readCatalog();
+  }
+
+  private async generarNumero(tx: Prisma.TransactionClient) {
+    for (let intento = 0; intento < 20; intento += 1) {
+      const numero = Math.floor(10000 + Math.random() * 90000);
+      const existente = await tx.bien.findUnique({
+        where: { numero },
+        select: { id: true },
+      });
+      if (!existente) return numero;
+    }
+    throw new BadRequestException('No se pudo generar un número NIA/NIM único');
   }
 }

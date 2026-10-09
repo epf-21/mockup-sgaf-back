@@ -29,3 +29,76 @@ GET http://localhost:3000/personas
 Content-Type: application/json
 Accept: application/json
 
+###
+POST http://localhost:3000/bienes
+Content-Type: application/json
+Accept: application/json
+
+{
+  "codificador_id": "a48e6106-54c9-49e6-afd7-bb5bee64833f",
+  "descripcion": "laptop personal dell",
+  "atributos": {
+    "marca": "Dell",
+    "modelo": "OptiPlex",
+    "serie": "SERIE-001",
+    "ram_gb": "16",
+    "estado_fisico": "bueno"
+  },
+  "estado_fisico": "bueno",
+  "unidad_id": "d35b6a6e-623a-4616-b7a8-20b2c19dc141",
+  "responsable_id": "74ed4318-f4bd-4c52-931b-6e250f089f17",
+  "ubicacion": "Oficina 301",
+  "tenencia": "propio",
+  "patrimonial": true,
+  "fecha_alta": "2026-10-09",
+  "procedencia": "COMPRA",
+  "proveedor": "Proveedor Demo",
+  "valor_original": "15000",
+  "moneda": "BOB",
+  "componentes": []
+}
+
+###
+POST http://localhost:3000/bienes
+Content-Type: application/json
+Accept: application/json
+
+{
+  "codificador_id": "a48e6106-54c9-49e6-afd7-bb5bee64833f",
+  "descripcion": "PUESTO DE TRABAJO INFORMÁTICO",
+  "atributos": {
+    "marca": "Dell",
+    "modelo": "OptiPlex 7010",
+    "serie": "SERIE-ACTIVO-002",
+    "ram_gb": 32,
+    "nucleos": 8,
+    "so": "Ubuntu 24.04",
+    "tipo_ram": "DDR5",
+    "estado_fisico": "bueno"
+  },
+  "estado_fisico": "bueno",
+  "unidad_id": "d35b6a6e-623a-4616-b7a8-20b2c19dc141",
+  "responsable_id": "74ed4318-f4bd-4c52-931b-6e250f089f17",
+  "ubicacion": "Laboratorio de cómputo 2",
+  "tenencia": "propio",
+  "patrimonial": true,
+  "fecha_alta": "2026-10-09",
+  "procedencia": "COMPRA",
+  "proveedor": "Proveedor de mobiliario Demo",
+  "valor_original": 18500,
+  "moneda": "BOB",
+  "componentes": [
+    {
+      "codificador_id": "e2700ece-05b7-4ec4-82b6-300448b1a1bc",
+      "descripcion": "disco duro asus",
+      "atributos": {
+        "marca": "Asus",
+        "modelo": "OptiPlex 7010",
+        "serie": "SERIE-ACTIVO-123",
+        "estado_fisico": "bueno"
+      },
+      "valor_original": 1250,
+      "moneda": "BOB"
+    }
+  ]
+}

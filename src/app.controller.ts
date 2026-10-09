@@ -1,5 +1,6 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { AppService } from './app.service';
+import { CrearBienBody } from './bienes/bienes.types';
 
 @Controller()
 export class AppController {
@@ -38,5 +39,10 @@ export class AppController {
   @Get('personas')
   getPersonas() {
     return this.appService.getPersonas();
+  }
+
+  @Post('bienes')
+  crearBien(@Body() body: CrearBienBody) {
+    return this.appService.crearBien(body);
   }
 }

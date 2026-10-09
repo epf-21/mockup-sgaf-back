@@ -41,17 +41,15 @@ docker compose up -d database
 
 ## Configurar Prisma
 
-Carga los datos demo de unidades organizacionales y usuarios:
+Carga todos los datos demo con un solo comando:
 
 ```bash
-bun run db:seed:unidades
-bun run db:seed:usuarios
-bun run db:seed:personas
+bun run db:seed
 ```
 
-Los usuarios creados pertenecen a los roles `inventariador`, `supervisor` y
-`administrador`. Los seeds son repetibles y actualizan los registros demo si
-ya existen.
+El comando ejecuta, en orden, los seeds de codificadores, personas, unidades
+organizacionales y usuarios. Los seeds son repetibles y actualizan los
+registros demo si ya existen.
 
 Aplica las migraciones existentes en la base de datos:
 
@@ -153,7 +151,15 @@ bun run format
 
 ```bash
 bun run db:seed
+```
 
+También puedes ejecutar un seeder individual cuando necesites probarlo:
+
+```bash
+bun run db:seed:codificadores
+bun run db:seed:personas
+bun run db:seed:unidades
+bun run db:seed:usuarios
 ```
 
 ## Estructura relevante

@@ -12,7 +12,8 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "db:seed": "node --import tsx prisma/seed.ts",
+    "db:seed": "bun run db:seed:codificadores && bun run db:seed:personas && bun run db:seed:unidades && bun run db:seed:usuarios",
+    "db:seed:codificadores": "node --import tsx prisma/seed.ts",
     "db:seed:personas": "node --import tsx prisma/seed-personas.ts",
     "db:seed:unidades": "node --import tsx prisma/seed-unidades.ts",
     "db:seed:usuarios": "node --import tsx prisma/seed-usuarios.ts",
@@ -31,6 +32,8 @@
     "@nestjs/platform-express": "^11.0.1",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "7",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1",
     "pg": "^8.23.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"

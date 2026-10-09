@@ -1,23 +1,8 @@
 import 'dotenv/config';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { PrismaClient } from '../src/generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 
-// Ruta relativa al cwd del proyecto (donde se ejecuta npm run db:seed)
-const CATALOGO_PATH = join(process.cwd(), 'prisma', 'catalogos', 'atributos.json');
-
-// ─── Tipos del catálogo ──────────────────────────────────────
-interface AtributoCatalogo {
-  codigo: string;
-  nombre: string;
-  tipo_dato: string;
-  unidad_medida?: string;
-  obligatorio: boolean;
-  orden: number;
-}
-
-interface CodificadorCatalogo {
+interface CodificadorSeed {
   codigo: string;
   nombre: string;
   clase: 'activo' | 'material';
@@ -26,45 +11,162 @@ interface CodificadorCatalogo {
   tasa_depreciacion: number | null;
   vida_util_meses: number | null;
   cuenta_contable: string;
-  atributos: AtributoCatalogo[];
 }
 
-interface CatalogoAtributos {
-  codificadores: CodificadorCatalogo[];
-}
+const CODIFICADORES: CodificadorSeed[] = [
+  {
+    codigo: '2.1.3.01',
+    nombre: 'COMPUTADOR PERSONAL',
+    clase: 'activo',
+    naturaleza: 'tangible',
+    depreciable: true,
+    tasa_depreciacion: 25,
+    vida_util_meses: 48,
+    cuenta_contable: '12310',
+  },
+  {
+    codigo: '2.1.3.03',
+    nombre: 'DISCO DURO',
+    clase: 'activo',
+    naturaleza: 'tangible',
+    depreciable: true,
+    tasa_depreciacion: 25,
+    vida_util_meses: 48,
+    cuenta_contable: '12310',
+  },
+  {
+    codigo: '2.1.5.01',
+    nombre: 'VEHÍCULO',
+    clase: 'activo',
+    naturaleza: 'tangible',
+    depreciable: true,
+    tasa_depreciacion: 20,
+    vida_util_meses: 60,
+    cuenta_contable: '12320',
+  },
+  {
+    codigo: '3.1.0.01',
+    nombre: 'TERRENO',
+    clase: 'activo',
+    naturaleza: 'tangible',
+    depreciable: false,
+    tasa_depreciacion: null,
+    vida_util_meses: null,
+    cuenta_contable: '12100',
+  },
+  {
+    codigo: '4.1.0.01',
+    nombre: 'LICENCIA DE SOFTWARE',
+    clase: 'activo',
+    naturaleza: 'intangible',
+    depreciable: true,
+    tasa_depreciacion: 33,
+    vida_util_meses: 36,
+    cuenta_contable: '13110',
+  },
+  {
+    codigo: '5.1.0.01',
+    nombre: 'PIZARRA ACRÍLICA',
+    clase: 'material',
+    naturaleza: 'tangible',
+    depreciable: false,
+    tasa_depreciacion: null,
+    vida_util_meses: null,
+    cuenta_contable: '51100',
+  },
+  {
+    codigo: '2.1.3.05',
+    nombre: 'MONITOR',
+    clase: 'activo',
+    naturaleza: 'tangible',
+    depreciable: true,
+    tasa_depreciacion: 25,
+    vida_util_meses: 48,
+    cuenta_contable: '12310',
+  },
+  {
+    codigo: '2.1.3.06',
+    nombre: 'IMPRESORA',
+    clase: 'activo',
+    naturaleza: 'tangible',
+    depreciable: true,
+    tasa_depreciacion: 25,
+    vida_util_meses: 48,
+    cuenta_contable: '12310',
+  },
+  {
+    codigo: '2.1.3.07',
+    nombre: 'ESCANER',
+    clase: 'activo',
+    naturaleza: 'tangible',
+    depreciable: true,
+    tasa_depreciacion: 25,
+    vida_util_meses: 48,
+    cuenta_contable: '12310',
+  },
+  {
+    codigo: '2.1.6.01',
+    nombre: 'PROYECTOR MULTIMEDIA',
+    clase: 'activo',
+    naturaleza: 'tangible',
+    depreciable: true,
+    tasa_depreciacion: 25,
+    vida_util_meses: 48,
+    cuenta_contable: '12310',
+  },
+  {
+    codigo: '2.1.7.01',
+    nombre: 'EQUIPO DE AUDIO',
+    clase: 'activo',
+    naturaleza: 'tangible',
+    depreciable: true,
+    tasa_depreciacion: 20,
+    vida_util_meses: 60,
+    cuenta_contable: '12310',
+  },
+  {
+    codigo: '3.2.0.01',
+    nombre: 'EDIFICIO',
+    clase: 'activo',
+    naturaleza: 'tangible',
+    depreciable: true,
+    tasa_depreciacion: 5,
+    vida_util_meses: 240,
+    cuenta_contable: '12410',
+  },
+  {
+    codigo: '5.2.0.01',
+    nombre: 'SILLA DE OFICINA',
+    clase: 'material',
+    naturaleza: 'tangible',
+    depreciable: false,
+    tasa_depreciacion: null,
+    vida_util_meses: null,
+    cuenta_contable: '51100',
+  },
+  {
+    codigo: '5.2.0.02',
+    nombre: 'ESCRITORIO',
+    clase: 'material',
+    naturaleza: 'tangible',
+    depreciable: false,
+    tasa_depreciacion: null,
+    vida_util_meses: null,
+    cuenta_contable: '51100',
+  },
+  {
+    codigo: '6.1.0.01',
+    nombre: 'MUEBLE DE ARCHIVO',
+    clase: 'material',
+    naturaleza: 'tangible',
+    depreciable: false,
+    tasa_depreciacion: null,
+    vida_util_meses: null,
+    cuenta_contable: '51100',
+  },
+];
 
-// ─── Validación del JSON ─────────────────────────────────────
-function validarCatalogo(catalogo: unknown): asserts catalogo is CatalogoAtributos {
-  if (!catalogo || typeof catalogo !== 'object') {
-    throw new Error('El catálogo debe ser un objeto JSON');
-  }
-  const c = catalogo as Record<string, unknown>;
-  if (!Array.isArray(c.codificadores)) {
-    throw new Error('El catálogo debe tener un arreglo "codificadores"');
-  }
-  for (const cod of c.codificadores as CodificadorCatalogo[]) {
-    if (!cod.codigo || !cod.nombre || !cod.clase || !cod.naturaleza) {
-      throw new Error(`Codificador incompleto: ${JSON.stringify(cod)}`);
-    }
-    if (!Array.isArray(cod.atributos)) {
-      throw new Error(`Codificador ${cod.codigo} sin arreglo "atributos"`);
-    }
-  }
-}
-
-// ─── Seed ────────────────────────────────────────────────────
 async function main() {
-  const ruta = CATALOGO_PATH;
-  let catalogo: CatalogoAtributos;
-
-  try {
-    const raw = readFileSync(ruta, 'utf-8');
-    catalogo = JSON.parse(raw) as CatalogoAtributos;
-    validarCatalogo(catalogo);
-  } catch (err) {
-    throw new Error(`No se pudo leer/validar el catálogo: ${(err as Error).message}`);
-  }
-
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
     throw new Error('DATABASE_URL no está definida en el entorno');
@@ -72,61 +174,33 @@ async function main() {
 
   const adapter = new PrismaPg({ connectionString });
   const prisma = new PrismaClient({ adapter });
-
   let creados = 0;
   let actualizados = 0;
-  const errores: string[] = [];
 
   try {
-    for (const c of catalogo.codificadores) {
-      try {
-        const datos = {
-          nombre: c.nombre,
-          clase: c.clase,
-          naturaleza: c.naturaleza,
-          depreciable: c.depreciable,
-          tasa_depreciacion: c.tasa_depreciacion,
-          vida_util_meses: c.vida_util_meses,
-          cuenta_contable: c.cuenta_contable,
-        };
+    for (const codificador of CODIFICADORES) {
+      const existente = await prisma.codificador.findUnique({
+        where: { codigo: codificador.codigo },
+      });
 
-        const existente = await prisma.codificador.findUnique({
-          where: { codigo: c.codigo },
+      if (existente) {
+        await prisma.codificador.update({
+          where: { codigo: codificador.codigo },
+          data: codificador,
         });
-
-        if (existente) {
-          await prisma.codificador.update({
-            where: { codigo: c.codigo },
-            data: datos,
-          });
-          actualizados += 1;
-        } else {
-          await prisma.codificador.create({
-            data: { codigo: c.codigo, ...datos },
-          });
-          creados += 1;
-        }
-      } catch (err) {
-        errores.push(`${c.codigo}: ${(err as Error).message}`);
+        actualizados += 1;
+      } else {
+        await prisma.codificador.create({
+          data: codificador,
+        });
+        creados += 1;
       }
     }
 
     const total = await prisma.codificador.count();
-
-    if (errores.length > 0) {
-      console.error('Errores durante el seed:');
-      for (const e of errores) {
-        console.error(`  - ${e}`);
-      }
-    }
-
     console.log(
       `Seed codificadores: ${creados} creados, ${actualizados} actualizados (total en BD: ${total})`,
     );
-
-    if (errores.length > 0) {
-      process.exitCode = 1;
-    }
   } finally {
     await prisma.$disconnect();
   }
