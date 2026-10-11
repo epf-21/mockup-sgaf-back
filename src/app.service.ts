@@ -96,6 +96,61 @@ export class AppService {
     }));
   }
 
+  async getBienes() {
+    const bienes = await this.prisma.bien.findMany({
+      select: {
+        id: true,
+        padre_id: true,
+        numero: true,
+        descripcion: true,
+        estado: true,
+        codificador: {
+          select: {
+            codigo: true,
+            clase: true,
+          },
+        },
+        unidad: {
+          select: {
+            nombre: true,
+          },
+        },
+        responsable: {
+          select: {
+            nombre_completo: true,
+          },
+        },
+      },
+      orderBy: {
+        numero: 'asc',
+      },
+    });
+
+    return bienes.map((bien) => ({
+      id: bien.id,
+      codigo: `${bien.padre_id || bien.codificador.clase === 'material' ? 'NIM' : 'NIA'}-${String(
+        bien.numero,
+      ).padStart(5, '0')}`,
+      descripcion: bien.descripcion,
+      codificador: bien.codificador.codigo,
+      unidad: bien.unidad.nombre,
+      responsable: bien.responsable.nombre_completo,
+      estado: this.normalizarEstadoBien(bien.estado),
+    }));
+  }
+
+  private normalizarEstadoBien(estado: string) {
+    const estados: Record<string, string> = {
+      en_registro: 'En registro',
+      activo: 'Activo',
+      fuera_de_servicio: 'Fuera de servicio',
+      en_prestamo: 'En prestamo',
+      baja: 'Baja',
+    };
+
+    return estados[estado] ?? estado;
+  }
+
   async crearBien(body: CrearBienBody) {
     const padre = await this.bienValidator.validateParent(body);
     const componentes = body.componentes ?? [];

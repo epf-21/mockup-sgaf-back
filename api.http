@@ -30,12 +30,17 @@ Content-Type: application/json
 Accept: application/json
 
 ###
+GET http://localhost:3000/bienes
+Content-Type: application/json
+Accept: application/json
+
+###
 POST http://localhost:3000/bienes
 Content-Type: application/json
 Accept: application/json
 
 {
-  "codificador_id": "a48e6106-54c9-49e6-afd7-bb5bee64833f",
+  "codificador_id": "79429c3f-5fbe-41ba-af5e-801810df595b",
   "descripcion": "laptop personal dell",
   "atributos": {
     "marca": "Dell",
@@ -45,8 +50,8 @@ Accept: application/json
     "estado_fisico": "bueno"
   },
   "estado_fisico": "bueno",
-  "unidad_id": "d35b6a6e-623a-4616-b7a8-20b2c19dc141",
-  "responsable_id": "74ed4318-f4bd-4c52-931b-6e250f089f17",
+  "unidad_id": "9a8d6ca3-7136-4fae-9c52-4d1d4d960e6d",
+  "responsable_id": "5e8400b7-ee2f-45b6-a65f-96d1552d15a7",
   "ubicacion": "Oficina 301",
   "tenencia": "propio",
   "patrimonial": true,
@@ -58,13 +63,13 @@ Accept: application/json
   "componentes": []
 }
 
-###
+### con componenetes
 POST http://localhost:3000/bienes
 Content-Type: application/json
 Accept: application/json
 
 {
-  "codificador_id": "a48e6106-54c9-49e6-afd7-bb5bee64833f",
+  "codificador_id": "79429c3f-5fbe-41ba-af5e-801810df595b",
   "descripcion": "PUESTO DE TRABAJO INFORMÁTICO",
   "atributos": {
     "marca": "Dell",
@@ -77,8 +82,8 @@ Accept: application/json
     "estado_fisico": "bueno"
   },
   "estado_fisico": "bueno",
-  "unidad_id": "d35b6a6e-623a-4616-b7a8-20b2c19dc141",
-  "responsable_id": "74ed4318-f4bd-4c52-931b-6e250f089f17",
+  "unidad_id": "9a8d6ca3-7136-4fae-9c52-4d1d4d960e6d",
+  "responsable_id": "1ad29c84-d3f4-43a9-bb18-203de03be362",
   "ubicacion": "Laboratorio de cómputo 2",
   "tenencia": "propio",
   "patrimonial": true,
@@ -89,7 +94,7 @@ Accept: application/json
   "moneda": "BOB",
   "componentes": [
     {
-      "codificador_id": "e2700ece-05b7-4ec4-82b6-300448b1a1bc",
+      "codificador_id": "d6289041-7726-41d1-9399-de751136c2a3",
       "descripcion": "disco duro asus",
       "atributos": {
         "marca": "Asus",

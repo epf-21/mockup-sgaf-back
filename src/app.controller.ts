@@ -41,6 +41,11 @@ export class AppController {
     return this.appService.getPersonas();
   }
 
+  @Get('bienes')
+  getBienes() {
+    return this.appService.getBienes();
+  }
+
   @Post('bienes')
   crearBien(@Body() body: CrearBienBody) {
     return this.appService.crearBien(body);
