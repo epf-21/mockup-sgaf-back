@@ -40,18 +40,17 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "codificador_id": "79429c3f-5fbe-41ba-af5e-801810df595b",
+  "codificador_id": "e0bca643-d2f2-4839-b8fc-d1611cf2b99a",
   "descripcion": "laptop personal dell",
   "atributos": {
     "marca": "Dell",
     "modelo": "OptiPlex",
     "serie": "SERIE-001",
-    "ram_gb": "16",
-    "estado_fisico": "bueno"
+    "ram_gb": "16"
   },
   "estado_fisico": "bueno",
-  "unidad_id": "9a8d6ca3-7136-4fae-9c52-4d1d4d960e6d",
-  "responsable_id": "5e8400b7-ee2f-45b6-a65f-96d1552d15a7",
+  "unidad_id": "44d85f3e-3b7b-428b-93a9-ba5ed172d462",
+  "responsable_id": "625e5ffc-cfb4-4753-85ef-32c747f882f3",
   "ubicacion": "Oficina 301",
   "tenencia": "propio",
   "patrimonial": true,
@@ -69,7 +68,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "codificador_id": "79429c3f-5fbe-41ba-af5e-801810df595b",
+  "codificador_id": "e0bca643-d2f2-4839-b8fc-d1611cf2b99a",
   "descripcion": "PUESTO DE TRABAJO INFORMÁTICO",
   "atributos": {
     "marca": "Dell",
@@ -78,12 +77,11 @@ Accept: application/json
     "ram_gb": 32,
     "nucleos": 8,
     "so": "Ubuntu 24.04",
-    "tipo_ram": "DDR5",
-    "estado_fisico": "bueno"
+    "tipo_ram": "DDR5"
   },
   "estado_fisico": "bueno",
-  "unidad_id": "9a8d6ca3-7136-4fae-9c52-4d1d4d960e6d",
-  "responsable_id": "1ad29c84-d3f4-43a9-bb18-203de03be362",
+  "unidad_id": "44d85f3e-3b7b-428b-93a9-ba5ed172d462",
+  "responsable_id": "c2fef42e-08c1-45f3-af5e-9fdb42103a02",
   "ubicacion": "Laboratorio de cómputo 2",
   "tenencia": "propio",
   "patrimonial": true,
@@ -94,13 +92,12 @@ Accept: application/json
   "moneda": "BOB",
   "componentes": [
     {
-      "codificador_id": "d6289041-7726-41d1-9399-de751136c2a3",
+      "codificador_id": "a019a631-2407-4d1e-80cd-3e4634955bb0",
       "descripcion": "disco duro asus",
       "atributos": {
         "marca": "Asus",
         "modelo": "OptiPlex 7010",
-        "serie": "SERIE-ACTIVO-123",
-        "estado_fisico": "bueno"
+        "serie": "SERIE-ACTIVO-123"
       },
       "valor_original": 1250,
       "moneda": "BOB"

@@ -14,9 +14,7 @@ export interface AtributoCatalogo {
   codigo: string;
   nombre: string;
   tipo_dato: string;
-  unidad_medida?: string;
   obligatorio: boolean;
-  orden: number;
 }
 
 export interface CodificadorCatalogo {
@@ -81,6 +79,10 @@ export class BienValidator {
       unidad_id: string;
       responsable_id: string;
       ubicacion: string | null;
+      adquisicion_nro_documento: string | null | undefined;
+      origen_nombre: string | null | undefined;
+      procedencia: string | null | undefined;
+      proveedor: string | null | undefined;
     },
   ): Promise<BienCreateData> {
     const route = `componentes[${index}]`;
@@ -108,14 +110,14 @@ export class BienValidator {
       unidad_costo_id: unidad.id,
       fecha_alta: new Date(),
       adquisicion_tipo_documento: 'sin_documento',
-      adquisicion_nro_documento: null,
+      adquisicion_nro_documento: inheritance.adquisicion_nro_documento ?? '',
       fecha_adquisicion: new Date(),
-      origen_nombre: null,
+      origen_nombre: inheritance.origen_nombre,
       origen_tipo: 'propio',
-      ubicacion: body.ubicacion?.trim() || inheritance.ubicacion,
+      ubicacion: inheritance.ubicacion,
       moneda: body.moneda?.toUpperCase() || 'BOB',
-      procedencia: null,
-      proveedor: null,
+      procedencia: inheritance.procedencia,
+      proveedor: inheritance.proveedor,
       atributos: JSON.stringify(atributos),
     };
   }
@@ -203,41 +205,22 @@ export class BienValidator {
   }
 
   private normalizeAttribute(value: unknown, type: string, route: string) {
-    if (type === 'string' || type === 'date' || type === 'enum') {
+    if (type === 'string' || type === 'date') {
       if (typeof value !== 'string' || !value.trim()) {
         throw new BadRequestException(`${route} debe ser texto`);
       }
       if (type === 'date' && !this.isValidDate(value)) {
         throw new BadRequestException(`${route} debe tener formato YYYY-MM-DD`);
       }
-      if (
-        type === 'enum' &&
-        ![
-          'excelente',
-          'muy_bueno',
-          'bueno',
-          'regular',
-          'malo',
-          'chatarra',
-        ].includes(value)
-      ) {
-        throw new BadRequestException(
-          `${route} debe ser uno de los valores permitidos`,
-        );
-      }
       return value.trim();
     }
+
     if (type === 'number') {
       const number = typeof value === 'number' ? value : Number(value);
       if (!Number.isFinite(number)) {
         throw new BadRequestException(`${route} debe ser un número válido`);
       }
       return number;
-    }
-    if (type === 'boolean') {
-      if (typeof value === 'boolean') return value;
-      if (value === 'true' || value === 'false') return value === 'true';
-      throw new BadRequestException(`${route} debe ser booleano`);
     }
     throw new BadRequestException(`${route} tiene un tipo no soportado`);
   }

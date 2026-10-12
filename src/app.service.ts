@@ -162,6 +162,10 @@ export class AppService {
           unidad_id: padre.unidad_id,
           responsable_id: padre.responsable_id,
           ubicacion: padre.ubicacion ?? null,
+          adquisicion_nro_documento: padre.adquisicion_nro_documento,
+          origen_nombre: padre.origen_nombre,
+          procedencia: padre.procedencia,
+          proveedor: padre.proveedor,
         }),
       );
     }
