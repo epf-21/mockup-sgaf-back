@@ -98,6 +98,9 @@ export class AppService {
 
   async getBienes() {
     const bienes = await this.prisma.bien.findMany({
+      where: {
+        padre_id: null,
+      },
       select: {
         id: true,
         padre_id: true,
