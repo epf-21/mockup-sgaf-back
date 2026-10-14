@@ -33,44 +33,9 @@ Content-Type: application/json
 Accept: application/json
 
 
-### listar bienes (paginado por defecto: pagina=1, por_pagina=10)
+### 
 
 GET http://localhost:3000/bienes HTTP/1.1
-Content-Type: application/json
-Accept: application/json
-
-
-### listar bienes con paginacion
-
-GET http://localhost:3000/bienes?pagina=1&por_pagina=5 HTTP/1.1
-Content-Type: application/json
-Accept: application/json
-
-
-### filtrar por estado (acepta valor enum o label: activo, en_registro, "En registro", "Fuera de servicio", ...)
-
-GET http://localhost:3000/bienes?estado=activo HTTP/1.1
-Content-Type: application/json
-Accept: application/json
-
-
-### filtrar por codificador (categoria)
-
-GET http://localhost:3000/bienes?codificador_id=e3a94e58-80ef-4603-ad7d-1d61fc521854 HTTP/1.1
-Content-Type: application/json
-Accept: application/json
-
-
-### filtrar por atributos (pares clave:valor, combinados con AND)
-
-GET http://localhost:3000/bienes?atributos=marca:Dell HTTP/1.1
-Content-Type: application/json
-Accept: application/json
-
-
-### combinado: estado + codificador + atributos + paginacion
-
-GET http://localhost:3000/bienes?estado=en_registro&codificador_id=e3a94e58-80ef-4603-ad7d-1d61fc521854&atributos=marca:Dell&pagina=1&por_pagina=5 HTTP/1.1
 Content-Type: application/json
 Accept: application/json
 
