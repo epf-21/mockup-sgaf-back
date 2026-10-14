@@ -165,7 +165,8 @@ bun run db:seed:usuarios
 ## Estructura relevante
 
 - `src/`: código de la aplicación NestJS.
-- `src/database/`: módulo y servicio de Prisma.
+- `src/dominio/`, `src/aplicacion/`, `src/presentacion/`, `src/infraestructura/`: capas de Clean Architecture.
+- `src/infraestructura/base-datos/`: módulo y servicio de Prisma.
 - `prisma/schema.prisma`: modelo de datos.
 - `prisma/migrations/`: migraciones de la base de datos.
 - `compose.yml`: servicio PostgreSQL y volumen persistente.
