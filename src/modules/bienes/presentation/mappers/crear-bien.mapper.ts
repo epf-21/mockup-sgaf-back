@@ -24,10 +24,7 @@ export class CrearBienMapper {
       fechaAdquisicion: body.fecha_adquisicion,
       adquisicionTipoDocumento: body.adquisicion_tipo_documento,
       adquisicionNroDocumento: body.adquisicion_nro_documento ?? null,
-      procedencia: body.procedencia ?? null,
-      proveedor: body.proveedor ?? null,
       valorOriginal: body.valor_original ?? null,
-      moneda: body.moneda ?? null,
       componentes: body.componentes?.map((c) =>
         CrearBienMapper.componenteToInput(c),
       ),
@@ -42,7 +39,6 @@ export class CrearBienMapper {
       descripcion: body.descripcion,
       atributos: body.atributos,
       valorOriginal: body.valor_original ?? null,
-      moneda: body.moneda ?? null,
       unidadId: body.unidad_id ?? null,
       responsableId: body.responsable_id ?? null,
       ubicacion: body.ubicacion ?? null,

@@ -36,11 +36,6 @@ export class CrearComponenteBody {
   valor_original?: number | null;
 
   @IsOptional()
-  @IsString()
-  @Matches(/^[A-Za-z]{3}$/)
-  moneda?: string | null;
-
-  @IsOptional()
   @IsUUID('4')
   unidad_id?: string | null;
 
@@ -120,24 +115,9 @@ export class CrearBienBody {
   adquisicion_nro_documento?: string | null;
 
   @IsOptional()
-  @IsString()
-  @Length(1, 100)
-  procedencia?: string | null;
-
-  @IsOptional()
-  @IsString()
-  @Length(1, 255)
-  proveedor?: string | null;
-
-  @IsOptional()
   @Transform(toNumber)
   @IsNumber({ allowNaN: false, allowInfinity: false })
   valor_original?: number | null;
-
-  @IsOptional()
-  @IsString()
-  @Matches(/^[A-Za-z]{3}$/)
-  moneda?: string | null;
 
   @IsOptional()
   @ArrayMaxSize(50)

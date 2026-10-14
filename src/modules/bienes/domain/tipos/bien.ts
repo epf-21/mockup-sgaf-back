@@ -30,6 +30,8 @@ export enum TipoDocumentoAdq {
   SinDocumento = 'sin_documento',
 }
 
+export type AtributosBien = Record<string, string | number | boolean>;
+
 export type NuevoBien = {
   codificador_id: string;
   descripcion: string;
@@ -48,10 +50,7 @@ export type NuevoBien = {
   origen_nombre: string | null;
   origen_tipo: OrigenTipo;
   ubicacion: string | null;
-  moneda: string;
-  procedencia: string | null;
-  proveedor: string | null;
-  atributos: string;
+  atributos: AtributosBien;
 };
 
 export interface BienResumen {

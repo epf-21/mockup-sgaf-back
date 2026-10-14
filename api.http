@@ -1,106 +1,114 @@
-###
-GET http://localhost:3000/codificadores
-Content-Type: application/json
-Accept: application/json
+### 
 
-###
-GET http://localhost:3000/codificadores/detalle
-Content-Type: application/json
-Accept: application/json
-
-###
-GET http://localhost:3000/codificadores/atributos
-Content-Type: application/json
-Accept: application/json
-
-###
-GET http://localhost:3000/unidades
+GET http://localhost:3000/codificadores HTTP/1.1
 Content-Type: application/json
 Accept: application/json
 
 
-###
-GET http://localhost:3000/usuarios
+### 
+
+GET http://localhost:3000/codificadores/detalle HTTP/1.1
 Content-Type: application/json
 Accept: application/json
 
-###
-GET http://localhost:3000/personas
+
+### 
+
+GET http://localhost:3000/unidades HTTP/1.1
 Content-Type: application/json
 Accept: application/json
 
-###
-GET http://localhost:3000/bienes
+
+### 
+
+GET http://localhost:3000/usuarios HTTP/1.1
 Content-Type: application/json
 Accept: application/json
 
-###
-POST http://localhost:3000/bienes
+
+### 
+
+GET http://localhost:3000/personas HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+
+
+### 
+
+GET http://localhost:3000/bienes HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+
+
+### crear bien
+
+POST http://localhost:3000/bienes HTTP/1.1
 Content-Type: application/json
 Accept: application/json
 
 {
-  "codificador_id": "e0bca643-d2f2-4839-b8fc-d1611cf2b99a",
-  "descripcion": "laptop personal dell",
+  "adquisicion_nro_documento": "FAC-001",
+  "adquisicion_tipo_documento": "factura",
   "atributos": {
     "marca": "Dell",
     "modelo": "OptiPlex",
-    "serie": "SERIE-001",
-    "ram_gb": "16"
+    "ram_gb": "16",
+    "serie": "SERIE-001"
   },
+  "codificador_id": "e3a94e58-80ef-4603-ad7d-1d61fc521854",
+  "componentes": [],
+  "descripcion": "laptop personal dell",
   "estado_fisico": "bueno",
-  "unidad_id": "44d85f3e-3b7b-428b-93a9-ba5ed172d462",
-  "responsable_id": "625e5ffc-cfb4-4753-85ef-32c747f882f3",
-  "ubicacion": "Oficina 301",
-  "tenencia": "propio",
-  "patrimonial": true,
+  "fecha_adquisicion": "2026-10-09",
   "fecha_alta": "2026-10-09",
-  "procedencia": "COMPRA",
-  "proveedor": "Proveedor Demo",
-  "valor_original": "15000",
-  "moneda": "BOB",
-  "componentes": []
+  "patrimonial": true,
+  "propietario_nombre": null,
+  "responsable_id": "991ace6a-727a-4211-a66a-fc4439486fbc",
+  "tenencia": "propio",
+  "ubicacion": "Oficina 301",
+  "unidad_id": "50357eb5-79bb-4b17-9723-d8658f97c82c",
+  "valor_original": "15000"
 }
 
+
 ### con componenetes
-POST http://localhost:3000/bienes
+
+POST http://localhost:3000/bienes HTTP/1.1
 Content-Type: application/json
 Accept: application/json
 
 {
-  "codificador_id": "e0bca643-d2f2-4839-b8fc-d1611cf2b99a",
-  "descripcion": "PUESTO DE TRABAJO INFORMÁTICO",
   "atributos": {
     "marca": "Dell",
     "modelo": "OptiPlex 7010",
-    "serie": "SERIE-ACTIVO-002",
-    "ram_gb": 32,
     "nucleos": 8,
+    "ram_gb": 32,
+    "serie": "SERIE-ACTIVO-002",
     "so": "Ubuntu 24.04",
     "tipo_ram": "DDR5"
   },
-  "estado_fisico": "bueno",
-  "unidad_id": "44d85f3e-3b7b-428b-93a9-ba5ed172d462",
-  "responsable_id": "c2fef42e-08c1-45f3-af5e-9fdb42103a02",
-  "ubicacion": "Laboratorio de cómputo 2",
-  "tenencia": "propio",
-  "patrimonial": true,
-  "fecha_alta": "2026-10-09",
-  "procedencia": "COMPRA",
-  "proveedor": "Proveedor de mobiliario Demo",
-  "valor_original": 18500,
-  "moneda": "BOB",
+  "codificador_id": "e0bca643-d2f2-4839-b8fc-d1611cf2b99a",
   "componentes": [
     {
-      "codificador_id": "a019a631-2407-4d1e-80cd-3e4634955bb0",
-      "descripcion": "disco duro asus",
       "atributos": {
         "marca": "Asus",
         "modelo": "OptiPlex 7010",
         "serie": "SERIE-ACTIVO-123"
       },
-      "valor_original": 1250,
-      "moneda": "BOB"
+      "codificador_id": "a019a631-2407-4d1e-80cd-3e4634955bb0",
+      "descripcion": "disco duro asus",
+      "valor_original": 1250
     }
-  ]
+  ],
+  "descripcion": "PUESTO DE TRABAJO INFORMÁTICO",
+  "estado_fisico": "bueno",
+  "fecha_adquisicion": "2026-10-09",
+  "fecha_alta": "2026-10-09",
+  "patrimonial": true,
+  "propietario_nombre": null,
+  "responsable_id": "c2fef42e-08c1-45f3-af5e-9fdb42103a02",
+  "tenencia": "propio",
+  "ubicacion": "Laboratorio de cómputo 2",
+  "unidad_id": "44d85f3e-3b7b-428b-93a9-ba5ed172d462",
+  "valor_original": 18500
 }

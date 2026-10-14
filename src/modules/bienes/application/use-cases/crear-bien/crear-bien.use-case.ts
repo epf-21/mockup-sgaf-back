@@ -1,9 +1,11 @@
-import { BusinessRuleError } from '../../../../../shared/domain/errors/business-rule.error';
 import { NotFoundError } from '../../../../../shared/domain/errors/not-found.error';
-import type { CatalogoAtributosService } from '../../../../catalogos/application/services/catalogo-atributos.service';
 import type { BienRepositoryPort } from '../../../domain/ports/bien-repository.port';
 import type { ReferenciasBienPort } from '../../../domain/ports/referencias-bien.port';
-import type { BienCreado, NuevoBien } from '../../../domain/tipos/bien';
+import type {
+  AtributosBien,
+  BienCreado,
+  NuevoBien,
+} from '../../../domain/tipos/bien';
 import {
   EstadoBien,
   EstadoFisico,
@@ -16,7 +18,6 @@ export class CrearBienUseCase {
   constructor(
     private readonly bienes: BienRepositoryPort,
     private readonly referencias: ReferenciasBienPort,
-    private readonly catalogoAtributos: CatalogoAtributosService,
   ) {}
 
   async execute(input: CrearBienInput): Promise<BienCreado> {
@@ -39,13 +40,7 @@ export class CrearBienUseCase {
       );
     }
 
-    const atributos = await this.catalogoAtributos.validarYNormalizar(
-      input.atributos,
-      codificador.codigo,
-      'body',
-    );
-
-    const padre = this.construirPadre(input, codificador.id, atributos);
+    const padre = this.construirPadre(input, codificador.id);
 
     const componentes: NuevoBien[] = [];
     for (const [index, componente] of (input.componentes ?? []).entries()) {
@@ -56,8 +51,6 @@ export class CrearBienUseCase {
           ubicacion: padre.ubicacion,
           adquisicion_nro_documento: padre.adquisicion_nro_documento,
           origen_nombre: padre.origen_nombre,
-          procedencia: padre.procedencia,
-          proveedor: padre.proveedor,
         }),
       );
     }
@@ -68,11 +61,10 @@ export class CrearBienUseCase {
   private construirPadre(
     input: CrearBienInput,
     codificadorId: string,
-    atributos: Record<string, string | number | boolean>,
   ): NuevoBien {
     const origenTipo = (input.tenencia ?? OrigenTipo.Propio) as OrigenTipo;
     const adquisicionTipo = (input.adquisicionTipoDocumento ??
-      this.documentTypeFromOrigin(input.procedencia)) as TipoDocumentoAdq;
+      TipoDocumentoAdq.SinDocumento) as TipoDocumentoAdq;
 
     return {
       codificador_id: codificadorId,
@@ -96,10 +88,7 @@ export class CrearBienUseCase {
       origen_nombre: input.propietarioNombre?.trim() || null,
       origen_tipo: origenTipo,
       ubicacion: input.ubicacion?.trim() || null,
-      moneda: input.moneda?.toUpperCase() || 'BOB',
-      procedencia: input.procedencia?.trim() || null,
-      proveedor: input.proveedor?.trim() || null,
-      atributos: JSON.stringify(atributos),
+      atributos: this.normalizarAtributos(input.atributos),
     };
   }
 
@@ -112,12 +101,8 @@ export class CrearBienUseCase {
       ubicacion: string | null;
       adquisicion_nro_documento: string | null;
       origen_nombre: string | null;
-      procedencia: string | null;
-      proveedor: string | null;
     },
   ): Promise<NuevoBien> {
-    const route = `componentes[${index}]`;
-
     const codificador = await this.referencias.codificadorExiste(
       body.codificadorId,
     );
@@ -139,12 +124,6 @@ export class CrearBienUseCase {
       );
     }
 
-    const atributos = await this.catalogoAtributos.validarYNormalizar(
-      body.atributos,
-      codificador.codigo,
-      route,
-    );
-
     return {
       codificador_id: codificador.id,
       descripcion: body.descripcion.trim(),
@@ -163,21 +142,24 @@ export class CrearBienUseCase {
       origen_nombre: inheritance.origen_nombre,
       origen_tipo: OrigenTipo.Propio,
       ubicacion: inheritance.ubicacion,
-      moneda: body.moneda?.toUpperCase() || 'BOB',
-      procedencia: inheritance.procedencia,
-      proveedor: inheritance.proveedor,
-      atributos: JSON.stringify(atributos),
+      atributos: this.normalizarAtributos(body.atributos),
     };
   }
 
-  private documentTypeFromOrigin(origin?: string | null) {
-    const value = origin?.trim().toUpperCase();
-    if (value === 'COMPRA') return TipoDocumentoAdq.Factura;
-    if (value === 'DONACIÓN' || value === 'DONACION') {
-      return TipoDocumentoAdq.ActaDonacion;
+  private normalizarAtributos(
+    atributos: Record<string, unknown>,
+  ): AtributosBien {
+    const normalizados: AtributosBien = {};
+    for (const [clave, valor] of Object.entries(atributos)) {
+      if (valor === null || valor === undefined) continue;
+      if (typeof valor === 'number' || typeof valor === 'boolean') {
+        normalizados[clave] = valor;
+      } else if (typeof valor === 'string') {
+        normalizados[clave] = valor.trim();
+      } else {
+        normalizados[clave] = JSON.stringify(valor);
+      }
     }
-    return TipoDocumentoAdq.SinDocumento;
+    return normalizados;
   }
 }
-
-export { BusinessRuleError };

@@ -1,7 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../database/prisma.service';
 import type { BienRepositoryPort } from '../domain/ports/bien-repository.port';
-import type { BienCreado, BienResumen, NuevoBien } from '../domain/tipos/bien';
+import type {
+  AtributosBien,
+  BienCreado,
+  BienResumen,
+  NuevoBien,
+} from '../domain/tipos/bien';
 
 const ESTADO_BIEN_LABEL: Record<string, string> = {
   en_registro: 'En registro',
@@ -10,6 +15,12 @@ const ESTADO_BIEN_LABEL: Record<string, string> = {
   en_prestamo: 'En prestamo',
   baja: 'Baja',
 };
+
+function serializarAtributos(atributos: AtributosBien): string | null {
+  const entradas = Object.entries(atributos);
+  if (entradas.length === 0) return null;
+  return entradas.map(([clave, valor]) => `${clave}: ${valor}`).join(', ');
+}
 
 @Injectable()
 export class PrismaBienRepository implements BienRepositoryPort {
@@ -77,6 +88,7 @@ export class PrismaBienRepository implements BienRepositoryPort {
       const bienPadre = await tx.bien.create({
         data: {
           ...padre,
+          atributos: serializarAtributos(padre.atributos),
           numero: await this.generarNumero(tx),
         },
       });
@@ -90,6 +102,7 @@ export class PrismaBienRepository implements BienRepositoryPort {
         const creado = await tx.bien.create({
           data: {
             ...componente,
+            atributos: serializarAtributos(componente.atributos),
             padre_id: bienPadre.id,
             numero: await this.generarNumero(tx),
           },
