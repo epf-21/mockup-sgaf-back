@@ -94,12 +94,20 @@ export class PrismaBienRepository implements BienRepositoryPort {
       atributos: deserializarAtributos(bien.atributos),
     }));
 
+    const totalPaginas = Math.max(1, Math.ceil(total / paginacion.porPagina));
+
     return {
       datos,
       total,
       pagina: paginacion.pagina,
       por_pagina: paginacion.porPagina,
-      total_paginas: Math.max(1, Math.ceil(total / paginacion.porPagina)),
+      total_paginas: totalPaginas,
+      siguiente:
+        paginacion.pagina < totalPaginas ? paginacion.pagina + 1 : null,
+      anterior:
+        paginacion.pagina > 1
+          ? Math.min(paginacion.pagina - 1, totalPaginas)
+          : null,
     };
   }
 

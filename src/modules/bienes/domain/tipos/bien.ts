@@ -75,6 +75,8 @@ export interface PaginaBienResumen {
   pagina: number;
   por_pagina: number;
   total_paginas: number;
+  siguiente: number | null;
+  anterior: number | null;
 }
 
 export interface BienCreado {
