@@ -61,6 +61,20 @@ export interface BienResumen {
   unidad: string;
   responsable: string;
   estado: string;
+  atributos: Record<string, string>;
+}
+
+export interface Paginacion {
+  pagina: number;
+  porPagina: number;
+}
+
+export interface PaginaBienResumen {
+  datos: BienResumen[];
+  total: number;
+  pagina: number;
+  por_pagina: number;
+  total_paginas: number;
 }
 
 export interface BienCreado {

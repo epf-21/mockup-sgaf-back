@@ -4,8 +4,9 @@ import type { BienRepositoryPort } from '../domain/ports/bien-repository.port';
 import type {
   AtributosBien,
   BienCreado,
-  BienResumen,
   NuevoBien,
+  Paginacion,
+  PaginaBienResumen,
 } from '../domain/tipos/bien';
 
 const ESTADO_BIEN_LABEL: Record<string, string> = {
@@ -22,44 +23,65 @@ function serializarAtributos(atributos: AtributosBien): string | null {
   return entradas.map(([clave, valor]) => `${clave}: ${valor}`).join(', ');
 }
 
+function deserializarAtributos(texto: string | null): Record<string, string> {
+  if (!texto) return {};
+  const resultado: Record<string, string> = {};
+  const pares = texto.split(/,\s+(?=[\w-]+:\s)/);
+  for (const par of pares) {
+    const separador = par.indexOf(': ');
+    if (separador === -1) continue;
+    const clave = par.slice(0, separador).trim();
+    const valor = par.slice(separador + 2).trim();
+    if (clave) resultado[clave] = valor;
+  }
+  return resultado;
+}
+
 @Injectable()
 export class PrismaBienRepository implements BienRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
-  async listarRaiz(): Promise<BienResumen[]> {
-    const bienes = await this.prisma.bien.findMany({
-      where: {
-        padre_id: null,
-      },
-      select: {
-        id: true,
-        padre_id: true,
-        numero: true,
-        descripcion: true,
-        estado: true,
-        codificador: {
-          select: {
-            codigo: true,
-            clase: true,
-          },
-        },
-        unidad: {
-          select: {
-            nombre: true,
-          },
-        },
-        responsable: {
-          select: {
-            nombre_completo: true,
-          },
-        },
-      },
-      orderBy: {
-        numero: 'asc',
-      },
-    });
+  async listarPaginado(paginacion: Paginacion): Promise<PaginaBienResumen> {
+    const where = { padre_id: null };
+    const skip = (paginacion.pagina - 1) * paginacion.porPagina;
 
-    return bienes.map((bien) => ({
+    const [total, bienes] = await this.prisma.$transaction([
+      this.prisma.bien.count({ where }),
+      this.prisma.bien.findMany({
+        where,
+        select: {
+          id: true,
+          padre_id: true,
+          numero: true,
+          descripcion: true,
+          estado: true,
+          atributos: true,
+          codificador: {
+            select: {
+              codigo: true,
+              clase: true,
+            },
+          },
+          unidad: {
+            select: {
+              nombre: true,
+            },
+          },
+          responsable: {
+            select: {
+              nombre_completo: true,
+            },
+          },
+        },
+        orderBy: {
+          numero: 'asc',
+        },
+        skip,
+        take: paginacion.porPagina,
+      }),
+    ]);
+
+    const datos = bienes.map((bien) => ({
       id: bien.id,
       codigo: `${bien.padre_id || bien.codificador.clase === 'material' ? 'NIM' : 'NIA'}-${String(
         bien.numero,
@@ -69,7 +91,16 @@ export class PrismaBienRepository implements BienRepositoryPort {
       unidad: bien.unidad.nombre,
       responsable: bien.responsable.nombre_completo,
       estado: ESTADO_BIEN_LABEL[bien.estado] ?? bien.estado,
+      atributos: deserializarAtributos(bien.atributos),
     }));
+
+    return {
+      datos,
+      total,
+      pagina: paginacion.pagina,
+      por_pagina: paginacion.porPagina,
+      total_paginas: Math.max(1, Math.ceil(total / paginacion.porPagina)),
+    };
   }
 
   async existeNumero(numero: number): Promise<boolean> {
