@@ -1,11 +1,15 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import type { Prisma } from 'src/generated/prisma/client';
 import { PrismaService } from '../../../database/prisma.service';
 import type { BienRepositoryPort } from '../domain/ports/bien-repository.port';
 import type {
   AtributosBien,
   BienCreado,
-  BienResumen,
+  FiltroAtributo,
+  FiltrosBienes,
   NuevoBien,
+  Paginacion,
+  PaginaBienResumen,
 } from '../domain/tipos/bien';
 
 const ESTADO_BIEN_LABEL: Record<string, string> = {
@@ -22,44 +26,84 @@ function serializarAtributos(atributos: AtributosBien): string | null {
   return entradas.map(([clave, valor]) => `${clave}: ${valor}`).join(', ');
 }
 
+function condicionAtributo({
+  clave,
+  valor,
+}: FiltroAtributo): Prisma.bienWhereInput {
+  const par = `${clave}: ${valor}`;
+  return {
+    OR: [
+      { atributos: { equals: par } },
+      { atributos: { startsWith: `${par}, ` } },
+      { atributos: { endsWith: `, ${par}` } },
+      { atributos: { contains: `, ${par}, ` } },
+    ],
+  };
+}
+
+function construirWhere(filtros: FiltrosBienes): Prisma.bienWhereInput {
+  const AND: Prisma.bienWhereInput[] = [{ padre_id: null }];
+  if (filtros.estado) {
+    AND.push({ estado: filtros.estado });
+  }
+  if (filtros.codificadorId) {
+    AND.push({ codificador_id: filtros.codificadorId });
+  }
+  if (filtros.atributos?.length) {
+    for (const atributo of filtros.atributos) {
+      AND.push(condicionAtributo(atributo));
+    }
+  }
+  return { AND };
+}
+
 @Injectable()
 export class PrismaBienRepository implements BienRepositoryPort {
   constructor(private readonly prisma: PrismaService) {}
 
-  async listarRaiz(): Promise<BienResumen[]> {
-    const bienes = await this.prisma.bien.findMany({
-      where: {
-        padre_id: null,
-      },
-      select: {
-        id: true,
-        padre_id: true,
-        numero: true,
-        descripcion: true,
-        estado: true,
-        codificador: {
-          select: {
-            codigo: true,
-            clase: true,
-          },
-        },
-        unidad: {
-          select: {
-            nombre: true,
-          },
-        },
-        responsable: {
-          select: {
-            nombre_completo: true,
-          },
-        },
-      },
-      orderBy: {
-        numero: 'asc',
-      },
-    });
+  async listarPaginado(
+    filtros: FiltrosBienes,
+    paginacion: Paginacion,
+  ): Promise<PaginaBienResumen> {
+    const where = construirWhere(filtros);
+    const skip = (paginacion.pagina - 1) * paginacion.porPagina;
 
-    return bienes.map((bien) => ({
+    const [total, bienes] = await this.prisma.$transaction([
+      this.prisma.bien.count({ where }),
+      this.prisma.bien.findMany({
+        where,
+        select: {
+          id: true,
+          padre_id: true,
+          numero: true,
+          descripcion: true,
+          estado: true,
+          codificador: {
+            select: {
+              codigo: true,
+              clase: true,
+            },
+          },
+          unidad: {
+            select: {
+              nombre: true,
+            },
+          },
+          responsable: {
+            select: {
+              nombre_completo: true,
+            },
+          },
+        },
+        orderBy: {
+          numero: 'asc',
+        },
+        skip,
+        take: paginacion.porPagina,
+      }),
+    ]);
+
+    const datos = bienes.map((bien) => ({
       id: bien.id,
       codigo: `${bien.padre_id || bien.codificador.clase === 'material' ? 'NIM' : 'NIA'}-${String(
         bien.numero,
@@ -70,6 +114,14 @@ export class PrismaBienRepository implements BienRepositoryPort {
       responsable: bien.responsable.nombre_completo,
       estado: ESTADO_BIEN_LABEL[bien.estado] ?? bien.estado,
     }));
+
+    return {
+      datos,
+      total,
+      pagina: paginacion.pagina,
+      por_pagina: paginacion.porPagina,
+      total_paginas: Math.max(1, Math.ceil(total / paginacion.porPagina)),
+    };
   }
 
   async existeNumero(numero: number): Promise<boolean> {

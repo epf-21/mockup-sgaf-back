@@ -63,6 +63,30 @@ export interface BienResumen {
   estado: string;
 }
 
+export interface FiltroAtributo {
+  clave: string;
+  valor: string;
+}
+
+export interface FiltrosBienes {
+  estado?: EstadoBien;
+  codificadorId?: string;
+  atributos?: FiltroAtributo[];
+}
+
+export interface Paginacion {
+  pagina: number;
+  porPagina: number;
+}
+
+export interface PaginaBienResumen {
+  datos: BienResumen[];
+  total: number;
+  pagina: number;
+  por_pagina: number;
+  total_paginas: number;
+}
+
 export interface BienCreado {
   id: string;
   numero: number;
