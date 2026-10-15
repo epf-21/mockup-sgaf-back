@@ -4,6 +4,7 @@ import type { BienRepositoryPort } from '../../dominio/bienes/puertos/bien-repos
 import type {
   AtributosBien,
   BienCreado,
+  BienDetalle,
   NuevoBien,
   Paginacion,
   PaginaBienResumen,
@@ -16,6 +17,31 @@ const ESTADO_BIEN_LABEL: Record<string, string> = {
   en_prestamo: 'En prestamo',
   baja: 'Baja',
 };
+
+
+
+const ESTADO_FISICO_LABEL: Record<string, string> = {
+  excelente: 'Excelente',
+  muy_bueno: 'Muy bueno',
+  bueno: 'Bueno',
+  regular: 'Regular',
+  malo: 'Malo',
+};
+
+const ESTADO_PROCESO_LABEL: Record<string, string> = {
+  pendiente: 'Pendiente',
+  procesado: 'Procesado',
+  cerrado: 'Cerrado',
+};
+
+function generarCodigo(
+  numero: number,
+  esComponente: boolean,
+  clase: string,
+): string {
+  const prefijo = esComponente || clase === 'material' ? 'NIM' : 'NIA';
+  return `${prefijo}-${String(numero).padStart(5, '0')}`;
+}
 
 function serializarAtributos(atributos: AtributosBien): string | null {
   const entradas = Object.entries(atributos);
@@ -37,9 +63,10 @@ function deserializarAtributos(texto: string | null): Record<string, string> {
   return resultado;
 }
 
+
 @Injectable()
 export class PrismaBienRepository implements BienRepositoryPort {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async listarPaginado(paginacion: Paginacion): Promise<PaginaBienResumen> {
     const where = { padre_id: null };
@@ -108,6 +135,151 @@ export class PrismaBienRepository implements BienRepositoryPort {
         paginacion.pagina > 1
           ? Math.min(paginacion.pagina - 1, totalPaginas)
           : null,
+    };
+  }
+
+  async obtenerDetalle(id: string): Promise<BienDetalle | null> {
+    const bien = await this.prisma.bien.findUnique({
+      where: { id },
+      include: {
+        codificador: {
+          select: { id: true, codigo: true, nombre: true, clase: true },
+        },
+        unidad: { select: { id: true, codigo: true, nombre: true } },
+        unidad_costo: { select: { id: true, codigo: true, nombre: true } },
+        responsable: {
+          select: {
+            id: true,
+            documento_identidad: true,
+            nombre_completo: true,
+          },
+        },
+        hijos: {
+          select: {
+            id: true,
+            numero: true,
+            descripcion: true,
+            estado: true,
+            atributos: true,
+          },
+          orderBy: { numero: 'asc' },
+        },
+        movimientos: {
+          select: {
+            id: true,
+            motivo: true,
+            observaciones: true,
+            unidad_origen: { select: { nombre: true } },
+            ubicacion_origen: { select: { nombre: true } },
+            responsable_origen: { select: { nombre_completo: true } },
+            unidad_destino: { select: { nombre: true } },
+            ubicacion_destino: { select: { nombre: true } },
+            responsable_destino: { select: { nombre_completo: true } },
+            proceso: {
+              select: {
+                id: true,
+                codigo: true,
+                estado: true,
+                fecha_autorizacion: true,
+                fecha_cierre: true,
+                tipo_proceso: {
+                  select: { codigo: true, nombre: true, categoria: true },
+                },
+              },
+            },
+          },
+          orderBy: {
+            proceso: { fecha_autorizacion: 'desc' },
+          },
+        },
+      },
+    });
+
+    if (!bien) return null;
+
+    return {
+      id: bien.id,
+      codigo: generarCodigo(
+        bien.numero,
+        bien.padre_id !== null,
+        bien.codificador.clase,
+      ),
+      descripcion: bien.descripcion,
+      estado: ESTADO_BIEN_LABEL[bien.estado] ?? bien.estado,
+      estado_fisico: bien.estado_fisico
+        ? (ESTADO_FISICO_LABEL[bien.estado_fisico] ?? bien.estado_fisico)
+        : null,
+      patrimonial: bien.patrimonial,
+      valor_original:
+        bien.valor_original === null ? null : Number(bien.valor_original),
+      fecha_alta: bien.fecha_alta,
+      fecha_adquisicion: bien.fecha_adquisicion,
+      adquisicion: {
+        tipo_documento: bien.adquisicion_tipo_documento,
+        nro_documento: bien.adquisicion_nro_documento,
+      },
+      origen: {
+        nombre: bien.origen_nombre,
+        tipo: bien.origen_tipo,
+      },
+      ubicacion: bien.ubicacion,
+      atributos: deserializarAtributos(bien.atributos),
+      codificador: {
+        id: bien.codificador.id,
+        codigo: bien.codificador.codigo,
+        nombre: bien.codificador.nombre,
+        clase: bien.codificador.clase,
+      },
+      unidad: {
+        id: bien.unidad.id,
+        codigo: bien.unidad.codigo,
+        nombre: bien.unidad.nombre,
+      },
+      unidad_costo: {
+        id: bien.unidad_costo.id,
+        codigo: bien.unidad_costo.codigo,
+        nombre: bien.unidad_costo.nombre,
+      },
+      responsable: {
+        id: bien.responsable.id,
+        documento_identidad: bien.responsable.documento_identidad,
+        nombre_completo: bien.responsable.nombre_completo,
+      },
+      componentes: bien.hijos.map((hijo) => ({
+        id: hijo.id,
+        codigo: generarCodigo(hijo.numero, true, 'activo'),
+        descripcion: hijo.descripcion,
+        estado: ESTADO_BIEN_LABEL[hijo.estado] ?? hijo.estado,
+        atributos: deserializarAtributos(hijo.atributos),
+      })),
+      movimientos: bien.movimientos.map((mov) => ({
+        id: mov.id,
+        motivo: mov.motivo,
+        observaciones: mov.observaciones,
+        origen: {
+          unidad: mov.unidad_origen?.nombre ?? null,
+          ubicacion: mov.ubicacion_origen?.nombre ?? null,
+          responsable: mov.responsable_origen?.nombre_completo ?? null,
+        },
+        destino: {
+          unidad: mov.unidad_destino?.nombre ?? null,
+          ubicacion: mov.ubicacion_destino?.nombre ?? null,
+          responsable: mov.responsable_destino?.nombre_completo ?? null,
+        },
+        proceso: {
+          id: mov.proceso.id,
+          codigo: mov.proceso.codigo,
+          estado:
+            ESTADO_PROCESO_LABEL[mov.proceso.estado] ?? mov.proceso.estado,
+          categoria: mov.proceso.tipo_proceso.categoria,
+          tipo: {
+            codigo: mov.proceso.tipo_proceso.codigo,
+            nombre: mov.proceso.tipo_proceso.nombre,
+          },
+          fecha_autorizacion: mov.proceso.fecha_autorizacion,
+          fecha_cierre: mov.proceso.fecha_cierre,
+        },
+      })),
     };
   }
 

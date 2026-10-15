@@ -42,7 +42,14 @@ Accept: application/json
 
 ### listar bienes con paginacion
 
-GET http://localhost:3000/bienes?por_pagina=5&pagina=1 HTTP/1.1
+GET http://localhost:3000/bienes?pagina=2&por_pagina=5 HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+
+
+### detalle de un bien (con componentes y movimientos)
+
+GET http://localhost:3000/bienes/2468ccd2-2dac-4ffd-9b09-20cc210e8a6f HTTP/1.1
 Content-Type: application/json
 Accept: application/json
 
