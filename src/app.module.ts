@@ -19,4 +19,4 @@ import { BienesModule } from './presentacion/bienes/bienes.module';
   ],
   controllers: [],
 })
-export class AppModule { }
+export class AppModule {}

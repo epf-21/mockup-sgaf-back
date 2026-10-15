@@ -18,8 +18,6 @@ const ESTADO_BIEN_LABEL: Record<string, string> = {
   baja: 'Baja',
 };
 
-
-
 const ESTADO_FISICO_LABEL: Record<string, string> = {
   excelente: 'Excelente',
   muy_bueno: 'Muy bueno',
@@ -63,16 +61,15 @@ function deserializarAtributos(texto: string | null): Record<string, string> {
   return resultado;
 }
 
-
 @Injectable()
 export class PrismaBienRepository implements BienRepositoryPort {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async listarPaginado(paginacion: Paginacion): Promise<PaginaBienResumen> {
     const where = { padre_id: null };
     const skip = (paginacion.pagina - 1) * paginacion.porPagina;
 
-    const [total, bienes] = await this.prisma.$transaction([
+    const [total, bienes] = await Promise.all([
       this.prisma.bien.count({ where }),
       this.prisma.bien.findMany({
         where,

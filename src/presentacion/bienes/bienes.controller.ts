@@ -25,7 +25,7 @@ export class BienesController {
     private readonly crearBien: CrearBienUseCase,
     @Inject(ObtenerDetalleBienUseCase)
     private readonly obtenerDetalleBien: ObtenerDetalleBienUseCase,
-  ) { }
+  ) {}
 
   @Get()
   getBienes(@Query() query: ListarBienesQuery) {
