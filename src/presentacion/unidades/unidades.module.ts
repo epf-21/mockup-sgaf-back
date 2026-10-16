@@ -1,21 +1,22 @@
 import { Module } from '@nestjs/common';
-import { UnidadRepositoryPort } from '../../dominio/unidades/puertos/unidad-repository.port';
+import { UnidadGateway } from '../../dominio/unidades/gateways/unidad.gateway';
+import { ListarUnidadesInputBoundary } from '../../aplicacion/unidades/listar-unidades/listar-unidades.input-boundary';
 import { ListarUnidadesUseCase } from '../../aplicacion/unidades/listar-unidades/listar-unidades.use-case';
-import { PrismaUnidadRepository } from '../../infraestructura/unidades/prisma-unidad.repository';
+import { PrismaUnidadGateway } from '../../infraestructura/unidades/prisma-unidad.gateway';
 import { UnidadesController } from './unidades.controller';
 
 @Module({
   controllers: [UnidadesController],
   providers: [
     {
-      provide: UnidadRepositoryPort,
-      useClass: PrismaUnidadRepository,
+      provide: UnidadGateway,
+      useClass: PrismaUnidadGateway,
     },
     {
-      provide: ListarUnidadesUseCase,
-      useFactory: (repositorio: UnidadRepositoryPort) =>
+      provide: ListarUnidadesInputBoundary,
+      useFactory: (repositorio: UnidadGateway) =>
         new ListarUnidadesUseCase(repositorio),
-      inject: [UnidadRepositoryPort],
+      inject: [UnidadGateway],
     },
   ],
 })

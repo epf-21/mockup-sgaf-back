@@ -6,7 +6,7 @@ import type {
   PaginaBienResumen,
 } from '../tipos/bien';
 
-export abstract class BienRepositoryPort {
+export abstract class BienGateway {
   abstract listarPaginado(paginacion: Paginacion): Promise<PaginaBienResumen>;
   abstract obtenerDetalle(id: string): Promise<BienDetalle | null>;
   abstract existeNumero(numero: number): Promise<boolean>;

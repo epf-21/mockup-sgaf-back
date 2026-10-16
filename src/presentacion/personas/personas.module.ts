@@ -1,34 +1,36 @@
 import { Module } from '@nestjs/common';
-import { PersonaRepositoryPort } from '../../dominio/personas/puertos/persona-repository.port';
-import { UsuarioRepositoryPort } from '../../dominio/personas/puertos/usuario-repository.port';
+import { PersonaGateway } from '../../dominio/personas/gateways/persona.gateway';
+import { UsuarioGateway } from '../../dominio/personas/gateways/usuario.gateway';
+import { ListarPersonasInputBoundary } from '../../aplicacion/personas/listar-personas/listar-personas.input-boundary';
+import { ListarUsuariosInputBoundary } from '../../aplicacion/personas/listar-usuarios/listar-usuarios.input-boundary';
 import { ListarPersonasUseCase } from '../../aplicacion/personas/listar-personas/listar-personas.use-case';
 import { ListarUsuariosUseCase } from '../../aplicacion/personas/listar-usuarios/listar-usuarios.use-case';
-import { PrismaPersonaRepository } from '../../infraestructura/personas/prisma-persona.repository';
-import { PrismaUsuarioRepository } from '../../infraestructura/personas/prisma-usuario.repository';
+import { PrismaPersonaGateway } from '../../infraestructura/personas/prisma-persona.gateway';
+import { PrismaUsuarioGateway } from '../../infraestructura/personas/prisma-usuario.gateway';
 import { PersonasController } from './personas.controller';
 
 @Module({
   controllers: [PersonasController],
   providers: [
     {
-      provide: PersonaRepositoryPort,
-      useClass: PrismaPersonaRepository,
+      provide: PersonaGateway,
+      useClass: PrismaPersonaGateway,
     },
     {
-      provide: UsuarioRepositoryPort,
-      useClass: PrismaUsuarioRepository,
+      provide: UsuarioGateway,
+      useClass: PrismaUsuarioGateway,
     },
     {
-      provide: ListarPersonasUseCase,
-      useFactory: (repositorio: PersonaRepositoryPort) =>
+      provide: ListarPersonasInputBoundary,
+      useFactory: (repositorio: PersonaGateway) =>
         new ListarPersonasUseCase(repositorio),
-      inject: [PersonaRepositoryPort],
+      inject: [PersonaGateway],
     },
     {
-      provide: ListarUsuariosUseCase,
-      useFactory: (repositorio: UsuarioRepositoryPort) =>
+      provide: ListarUsuariosInputBoundary,
+      useFactory: (repositorio: UsuarioGateway) =>
         new ListarUsuariosUseCase(repositorio),
-      inject: [UsuarioRepositoryPort],
+      inject: [UsuarioGateway],
     },
   ],
 })

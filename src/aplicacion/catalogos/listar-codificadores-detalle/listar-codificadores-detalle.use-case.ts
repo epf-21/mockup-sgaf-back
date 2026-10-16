@@ -1,7 +1,8 @@
-import type { CodificadorRepositoryPort } from '../../../dominio/catalogos/puertos/codificador-repository.port';
+import type { CodificadorGateway } from '../../../dominio/catalogos/gateways/codificador.gateway';
+import type { ListarCodificadoresDetalleInputBoundary } from './listar-codificadores-detalle.input-boundary';
 
-export class ListarCodificadoresDetalleUseCase {
-  constructor(private readonly repositorio: CodificadorRepositoryPort) {}
+export class ListarCodificadoresDetalleUseCase implements ListarCodificadoresDetalleInputBoundary {
+  constructor(private readonly repositorio: CodificadorGateway) {}
 
   execute() {
     return this.repositorio.listarDetalle();

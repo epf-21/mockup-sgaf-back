@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../base-datos/prisma.service';
-import type { CodificadorRepositoryPort } from '../../dominio/catalogos/puertos/codificador-repository.port';
+import type { CodificadorGateway } from '../../dominio/catalogos/gateways/codificador.gateway';
 import type {
   CodificadorDetalle,
   CodificadorResumen,
 } from '../../dominio/catalogos/tipos/codificador';
 
 @Injectable()
-export class PrismaCodificadorRepository implements CodificadorRepositoryPort {
+export class PrismaCodificadorGateway implements CodificadorGateway {
   constructor(private readonly prisma: PrismaService) {}
 
   async listarResumen(): Promise<CodificadorResumen[]> {

@@ -1,4 +1,4 @@
-export abstract class ReferenciasBienPort {
+export abstract class ReferenciasBienGateway {
   abstract codificadorExiste(
     id: string,
   ): Promise<{ id: string; codigo: string } | null>;

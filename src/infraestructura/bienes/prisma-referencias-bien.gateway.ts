@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../base-datos/prisma.service';
-import type { ReferenciasBienPort } from '../../dominio/bienes/puertos/referencias-bien.port';
+import type { ReferenciasBienGateway } from '../../dominio/bienes/gateways/referencias-bien.gateway';
 
 @Injectable()
-export class PrismaReferenciasBien implements ReferenciasBienPort {
+export class PrismaReferenciasBienGateway implements ReferenciasBienGateway {
   constructor(private readonly prisma: PrismaService) {}
 
   async codificadorExiste(id: string) {

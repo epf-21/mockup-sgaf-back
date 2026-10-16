@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../base-datos/prisma.service';
-import type { UnidadRepositoryPort } from '../../dominio/unidades/puertos/unidad-repository.port';
+import type { UnidadGateway } from '../../dominio/unidades/gateways/unidad.gateway';
 
 @Injectable()
-export class PrismaUnidadRepository implements UnidadRepositoryPort {
+export class PrismaUnidadGateway implements UnidadGateway {
   constructor(private readonly prisma: PrismaService) {}
 
   async listar() {

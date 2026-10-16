@@ -8,9 +8,9 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { CrearBienUseCase } from '../../aplicacion/bienes/crear-bien/crear-bien.use-case';
-import { ListarBienesUseCase } from '../../aplicacion/bienes/listar-bienes/listar-bienes.use-case';
-import { ObtenerDetalleBienUseCase } from '../../aplicacion/bienes/obtener-detalle-bien/obtener-detalle-bien.use-case';
+import { CrearBienInputBoundary } from '../../aplicacion/bienes/crear-bien/crear-bien.input-boundary';
+import { ListarBienesInputBoundary } from '../../aplicacion/bienes/listar-bienes/listar-bienes.input-boundary';
+import { ObtenerDetalleBienInputBoundary } from '../../aplicacion/bienes/obtener-detalle-bien/obtener-detalle-bien.input-boundary';
 import { CrearBienBody } from './dto/crear-bien.body';
 import { ListarBienesQuery } from './dto/listar-bienes.query';
 import { CrearBienMapper } from './mappers/crear-bien.mapper';
@@ -19,12 +19,12 @@ import { ListarBienesMapper } from './mappers/listar-bienes.mapper';
 @Controller('bienes')
 export class BienesController {
   constructor(
-    @Inject(ListarBienesUseCase)
-    private readonly listarBienes: ListarBienesUseCase,
-    @Inject(CrearBienUseCase)
-    private readonly crearBien: CrearBienUseCase,
-    @Inject(ObtenerDetalleBienUseCase)
-    private readonly obtenerDetalleBien: ObtenerDetalleBienUseCase,
+    @Inject(ListarBienesInputBoundary)
+    private readonly listarBienes: ListarBienesInputBoundary,
+    @Inject(CrearBienInputBoundary)
+    private readonly crearBien: CrearBienInputBoundary,
+    @Inject(ObtenerDetalleBienInputBoundary)
+    private readonly obtenerDetalleBien: ObtenerDetalleBienInputBoundary,
   ) {}
 
   @Get()

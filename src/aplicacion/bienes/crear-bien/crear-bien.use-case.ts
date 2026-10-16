@@ -1,6 +1,7 @@
 import { NotFoundError } from '../../../dominio/comun/errores/not-found.error';
-import type { BienRepositoryPort } from '../../../dominio/bienes/puertos/bien-repository.port';
-import type { ReferenciasBienPort } from '../../../dominio/bienes/puertos/referencias-bien.port';
+import { Bien } from '../../../dominio/bienes/entidades/bien.entity';
+import type { BienGateway } from '../../../dominio/bienes/gateways/bien.gateway';
+import type { ReferenciasBienGateway } from '../../../dominio/bienes/gateways/referencias-bien.gateway';
 import type {
   AtributosBien,
   BienCreado,
@@ -13,11 +14,12 @@ import {
   TipoDocumentoAdq,
 } from '../../../dominio/bienes/tipos/bien';
 import type { CrearBienInput, CrearComponenteInput } from './crear-bien.input';
+import type { CrearBienInputBoundary } from './crear-bien.input-boundary';
 
-export class CrearBienUseCase {
+export class CrearBienUseCase implements CrearBienInputBoundary {
   constructor(
-    private readonly bienes: BienRepositoryPort,
-    private readonly referencias: ReferenciasBienPort,
+    private readonly bienes: BienGateway,
+    private readonly referencias: ReferenciasBienGateway,
   ) {}
 
   async execute(input: CrearBienInput): Promise<BienCreado> {
@@ -66,13 +68,19 @@ export class CrearBienUseCase {
     const adquisicionTipo = (input.adquisicionTipoDocumento ??
       TipoDocumentoAdq.SinDocumento) as TipoDocumentoAdq;
 
+    const bien = Bien.crear({
+      descripcion: input.descripcion,
+      responsableId: input.responsableId,
+      origenTipo,
+      patrimonial: input.patrimonial ?? false,
+    });
+
     return {
       codificador_id: codificadorId,
-      descripcion: input.descripcion.trim(),
+      descripcion: bien.descripcion,
       unidad_id: input.unidadId,
-      responsable_id: input.responsableId,
-      patrimonial:
-        origenTipo === OrigenTipo.Propio ? (input.patrimonial ?? false) : false,
+      responsable_id: bien.responsableId,
+      patrimonial: bien.patrimonial,
       valor_original: input.valorOriginal ?? null,
       estado: EstadoBien.EnRegistro,
       estado_fisico_inicial: (input.estadoFisico ??

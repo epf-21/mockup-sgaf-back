@@ -1,7 +1,8 @@
-import type { UsuarioRepositoryPort } from '../../../dominio/personas/puertos/usuario-repository.port';
+import type { UsuarioGateway } from '../../../dominio/personas/gateways/usuario.gateway';
+import type { ListarUsuariosInputBoundary } from './listar-usuarios.input-boundary';
 
-export class ListarUsuariosUseCase {
-  constructor(private readonly repositorio: UsuarioRepositoryPort) {}
+export class ListarUsuariosUseCase implements ListarUsuariosInputBoundary {
+  constructor(private readonly repositorio: UsuarioGateway) {}
 
   execute() {
     return this.repositorio.listarActivosGestion();

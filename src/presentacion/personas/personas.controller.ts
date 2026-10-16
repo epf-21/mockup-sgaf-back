@@ -1,14 +1,14 @@
 import { Controller, Get, Inject } from '@nestjs/common';
-import { ListarPersonasUseCase } from '../../aplicacion/personas/listar-personas/listar-personas.use-case';
-import { ListarUsuariosUseCase } from '../../aplicacion/personas/listar-usuarios/listar-usuarios.use-case';
+import { ListarPersonasInputBoundary } from '../../aplicacion/personas/listar-personas/listar-personas.input-boundary';
+import { ListarUsuariosInputBoundary } from '../../aplicacion/personas/listar-usuarios/listar-usuarios.input-boundary';
 
 @Controller()
 export class PersonasController {
   constructor(
-    @Inject(ListarPersonasUseCase)
-    private readonly listarPersonas: ListarPersonasUseCase,
-    @Inject(ListarUsuariosUseCase)
-    private readonly listarUsuarios: ListarUsuariosUseCase,
+    @Inject(ListarPersonasInputBoundary)
+    private readonly listarPersonas: ListarPersonasInputBoundary,
+    @Inject(ListarUsuariosInputBoundary)
+    private readonly listarUsuarios: ListarUsuariosInputBoundary,
   ) {}
 
   @Get('personas')

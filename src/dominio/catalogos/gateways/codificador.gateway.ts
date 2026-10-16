@@ -3,7 +3,7 @@ import type {
   CodificadorResumen,
 } from '../tipos/codificador';
 
-export abstract class CodificadorRepositoryPort {
+export abstract class CodificadorGateway {
   abstract listarResumen(): Promise<CodificadorResumen[]>;
   abstract listarDetalle(): Promise<CodificadorDetalle[]>;
 }

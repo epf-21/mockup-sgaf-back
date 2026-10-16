@@ -1,11 +1,11 @@
 import { Controller, Get, Inject } from '@nestjs/common';
-import { ListarUnidadesUseCase } from '../../aplicacion/unidades/listar-unidades/listar-unidades.use-case';
+import { ListarUnidadesInputBoundary } from '../../aplicacion/unidades/listar-unidades/listar-unidades.input-boundary';
 
 @Controller('unidades')
 export class UnidadesController {
   constructor(
-    @Inject(ListarUnidadesUseCase)
-    private readonly listarUnidades: ListarUnidadesUseCase,
+    @Inject(ListarUnidadesInputBoundary)
+    private readonly listarUnidades: ListarUnidadesInputBoundary,
   ) {}
 
   @Get()

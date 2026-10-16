@@ -1,14 +1,14 @@
 import { Controller, Get, Inject } from '@nestjs/common';
-import { ListarCodificadoresResumenUseCase } from '../../aplicacion/catalogos/listar-codificadores-resumen/listar-codificadores-resumen.use-case';
-import { ListarCodificadoresDetalleUseCase } from '../../aplicacion/catalogos/listar-codificadores-detalle/listar-codificadores-detalle.use-case';
+import { ListarCodificadoresResumenInputBoundary } from '../../aplicacion/catalogos/listar-codificadores-resumen/listar-codificadores-resumen.input-boundary';
+import { ListarCodificadoresDetalleInputBoundary } from '../../aplicacion/catalogos/listar-codificadores-detalle/listar-codificadores-detalle.input-boundary';
 
 @Controller('codificadores')
 export class CodificadoresController {
   constructor(
-    @Inject(ListarCodificadoresResumenUseCase)
-    private readonly listarResumen: ListarCodificadoresResumenUseCase,
-    @Inject(ListarCodificadoresDetalleUseCase)
-    private readonly listarDetalle: ListarCodificadoresDetalleUseCase,
+    @Inject(ListarCodificadoresResumenInputBoundary)
+    private readonly listarResumen: ListarCodificadoresResumenInputBoundary,
+    @Inject(ListarCodificadoresDetalleInputBoundary)
+    private readonly listarDetalle: ListarCodificadoresDetalleInputBoundary,
   ) {}
 
   @Get()

@@ -4,6 +4,6 @@ export interface UsuarioResumen {
   rol: string;
 }
 
-export abstract class UsuarioRepositoryPort {
+export abstract class UsuarioGateway {
   abstract listarActivosGestion(): Promise<UsuarioResumen[]>;
 }

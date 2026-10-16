@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../base-datos/prisma.service';
-import type { BienRepositoryPort } from '../../dominio/bienes/puertos/bien-repository.port';
+import { Bien } from '../../dominio/bienes/entidades/bien.entity';
+import type { BienGateway } from '../../dominio/bienes/gateways/bien.gateway';
 import type {
   AtributosBien,
   BienCreado,
@@ -32,15 +33,6 @@ const ESTADO_PROCESO_LABEL: Record<string, string> = {
   cerrado: 'Cerrado',
 };
 
-function generarCodigo(
-  numero: number,
-  esComponente: boolean,
-  clase: string,
-): string {
-  const prefijo = esComponente || clase === 'material' ? 'NIM' : 'NIA';
-  return `${prefijo}-${String(numero).padStart(5, '0')}`;
-}
-
 function serializarAtributos(atributos: AtributosBien): string | null {
   const entradas = Object.entries(atributos);
   if (entradas.length === 0) return null;
@@ -62,7 +54,7 @@ function deserializarAtributos(texto: string | null): Record<string, string> {
 }
 
 @Injectable()
-export class PrismaBienRepository implements BienRepositoryPort {
+export class PrismaBienGateway implements BienGateway {
   constructor(private readonly prisma: PrismaService) {}
 
   async listarPaginado(paginacion: Paginacion): Promise<PaginaBienResumen> {
@@ -107,9 +99,11 @@ export class PrismaBienRepository implements BienRepositoryPort {
 
     const datos = bienes.map((bien) => ({
       id: bien.id,
-      codigo: `${bien.padre_id || bien.codificador.clase === 'material' ? 'NIM' : 'NIA'}-${String(
+      codigo: Bien.calcularCodigo(
         bien.numero,
-      ).padStart(5, '0')}`,
+        bien.padre_id !== null,
+        bien.codificador.clase,
+      ),
       descripcion: bien.descripcion,
       codificador: bien.codificador.codigo,
       unidad: bien.unidad.nombre,
@@ -196,7 +190,7 @@ export class PrismaBienRepository implements BienRepositoryPort {
 
     return {
       id: bien.id,
-      codigo: generarCodigo(
+      codigo: Bien.calcularCodigo(
         bien.numero,
         bien.padre_id !== null,
         bien.codificador.clase,
@@ -244,7 +238,7 @@ export class PrismaBienRepository implements BienRepositoryPort {
       },
       componentes: bien.hijos.map((hijo) => ({
         id: hijo.id,
-        codigo: generarCodigo(hijo.numero, true, 'activo'),
+        codigo: Bien.calcularCodigo(hijo.numero, true, 'activo'),
         descripcion: hijo.descripcion,
         estado: ESTADO_BIEN_LABEL[hijo.estado] ?? hijo.estado,
         atributos: deserializarAtributos(hijo.atributos),
