@@ -1,6 +1,3 @@
-// Converted 1:1 from db.md — field names, enums and constraints preserved as-is.
-// No @@index added (unique constraints from db.md only).
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -53,18 +50,6 @@ enum naturaleza_bien {
   intangible
 }
 
-enum metodo_depreciacion {
-  lineal
-  saldo_decreciente
-}
-
-enum tipo_dato {
-  string
-  number
-  date
-  boolean
-}
-
 enum estado_bien {
   en_registro
   activo
@@ -84,7 +69,6 @@ enum estado_fisico {
 enum rol_usuario {
   inventariador
   supervisor
-  tecnico_contable
   administrador
   custodio
   director
@@ -108,24 +92,6 @@ enum estado_tarea {
   cancelada
 }
 
-enum tipo_proceso_enum {
-  asignacion
-  traspaso
-  transferencia
-  devolucion
-  salida
-}
-
-enum etapa_proceso {
-  solicitud
-  autizacion
-  ejecucion
-  aceptacion
-  cierre
-  anulacion
-  rechazo
-}
-
 enum estado_movimiento {
   solicitud
   autorizado
@@ -141,7 +107,7 @@ enum estado_proceso {
 
 enum estado_hoja_ruta {
   pendiente
-  asiganda
+  asignada
   en_ejecucion
   pendiente_revision
   en_revision
@@ -158,7 +124,14 @@ enum resultado_inspeccion {
   requiere_reverificacion
 }
 
-// Renombrado para no chocar con estado_fisico del núcleo
+enum estado_bien_hoja_ruta {
+  pendiente
+  localizado
+  no_localizado
+  sobrante
+  requiere_reverificacion
+}
+
 enum estado_fisico_inventario {
   excelente
   muy_bueno
@@ -183,14 +156,48 @@ enum tipo_documento {
   baja
 }
 
-model Persona {
+enum estado_gestion {
+  abierta
+  cerrada
+}
+
+enum tipo_ajuste {
+  revaluo
+  ajuste_inflacion
+}
+
+enum estado_evento_inventario {
+  planificado
+  en_ejecucion
+  conciliacion
+  cerrado
+  cancelado
+}
+
+enum tipo_novedad {
+  sobrante
+  faltante
+  mal_estado
+  traslado_sin_autorizar
+  etiqueta_danada
+  otro
+}
+
+enum estado_novedad {
+  registrada
+  en_revision
+  resuelta
+  rechazada
+}
+
+model persona {
   id                  String  @id @default(uuid())
   documento_identidad String  @unique @db.VarChar
   nombre_completo     String  @db.VarChar
   email               String? @db.VarChar
   telefono            String? @db.VarChar
 
-  usuario                          Usuario?
+  usuario                          usuario?
   unidades_organizacional          unidad_organizacional[] @relation("UnidadResponsable")
   bienes_responsable               bien[]                  @relation("BienResponsable")
   movimientos_responsable_origen   movimientos[]           @relation("MovResponsableOrigen")
@@ -200,7 +207,7 @@ model Persona {
   @@map("persona")
 }
 
-model Usuario {
+model usuario {
   id         String      @id @default(uuid())
   persona_id String?     @unique
   email      String      @unique @db.VarChar
@@ -208,9 +215,9 @@ model Usuario {
   activo     Boolean     @default(true)
   creado_en  DateTime    @default(now()) @db.Timestamptz(3)
 
-  persona                            Persona?               @relation(fields: [persona_id], references: [id])
+  persona                            persona?               @relation(fields: [persona_id], references: [id])
   tareas_creadas                     tarea[]                @relation("TareaCreadoPor")
-  tareas_supervisor                  tarea_supervisor[]     @relation("TareaSupervisorUsuario")
+  tareas_asignadas                   tarea_usuario[]        @relation("TareaUsuario")
   procesos_autorizados               procesos[]             @relation("ProcesoAutorizadoPor")
   procesos_cerrados                  procesos[]             @relation("ProcesoCerradoPor")
   hojas_ruta_asignadas               hojas_ruta[]           @relation("HojaRutaAsignadoA")
@@ -234,7 +241,7 @@ model unidad_organizacional {
 
   padre                       unidad_organizacional?  @relation("UnidadPadre", fields: [padre_id], references: [id])
   hijos                       unidad_organizacional[] @relation("UnidadPadre")
-  responsable                 Persona                 @relation("UnidadResponsable", fields: [responsable_id], references: [id])
+  responsable                 persona                 @relation("UnidadResponsable", fields: [responsable_id], references: [id])
   ubicaciones                 ubicacion[]
   bienes                      bien[]                  @relation("BienUnidad")
   bienes_unidad_costo         bien[]                  @relation("BienUnidadCosto")
@@ -257,6 +264,7 @@ model ubicacion {
   longitud  Decimal?       @db.Decimal
 
   unidad                         unidad_organizacional? @relation(fields: [unidad_id], references: [id])
+  bienes                         bien[]
   movimientos_ubicacion_origen   movimientos[]          @relation("MovUbicacionOrigen")
   movimientos_ubicacion_destino  movimientos[]          @relation("MovUbicacionDestino")
   hojas_ruta                     hojas_ruta[]
@@ -266,16 +274,15 @@ model ubicacion {
 }
 
 model codificador {
-  id                  String               @id @default(uuid())
-  codigo              String               @unique @db.VarChar
-  nombre              String               @db.VarChar
-  clase               clase_bien
-  naturaleza          naturaleza_bien
-  depreciable         Boolean              @default(false)
-  tasa_depreciacion   Decimal?             @db.Decimal
-  vida_util_meses     Int?
-  metodo_depreciacion metodo_depreciacion?
-  cuenta_contable     String?              @db.VarChar
+  id                String          @id @default(uuid())
+  codigo            String          @unique @db.VarChar
+  nombre            String          @db.VarChar
+  clase             clase_bien
+  naturaleza        naturaleza_bien
+  depreciable       Boolean         @default(false)
+  tasa_depreciacion Decimal?        @db.Decimal
+  vida_util_meses   Int?
+  cuenta_contable   String?         @db.VarChar
 
   bienes bien[]
 
@@ -286,12 +293,16 @@ model bien {
   id                         String             @id @default(uuid())
   codificador_id             String
   padre_id                   String?
-  numero                     Int                @unique
+  numero                     Int
   descripcion                String             @db.VarChar
   unidad_id                  String
   responsable_id             String
   patrimonial                Boolean            @default(false)
   valor_original             Decimal?           @db.Decimal
+  valor_residual             Decimal?           @db.Decimal
+  depreciacion_acumulada     Decimal?           @default(0) @db.Decimal
+  valor_neto                 Decimal?           @db.Decimal
+  ajuste_inflacion           Decimal?           @default(0) @db.Decimal
   estado                     estado_bien        @default(en_registro)
   estado_fisico_inicial      estado_fisico?
   estado_fisico              estado_fisico?
@@ -302,20 +313,25 @@ model bien {
   fecha_adquisicion          DateTime           @db.Date
   origen_nombre              String?            @db.VarChar
   origen_tipo                origen_tipo?
-  ubicacion                  String?            @db.VarChar
+  ubicacion_id               String?
+  fecha_baja                 DateTime?          @db.Date
+  motivo_baja                String?
   atributos                  String?            @db.Text
 
   codificador  codificador           @relation(fields: [codificador_id], references: [id])
   padre        bien?                 @relation("BienPadre", fields: [padre_id], references: [id])
   hijos        bien[]                @relation("BienPadre")
   unidad       unidad_organizacional @relation("BienUnidad", fields: [unidad_id], references: [id])
-  responsable  Persona               @relation("BienResponsable", fields: [responsable_id], references: [id])
+  responsable  persona               @relation("BienResponsable", fields: [responsable_id], references: [id])
   unidad_costo unidad_organizacional @relation("BienUnidadCosto", fields: [unidad_costo_id], references: [id])
+  ubicacion    ubicacion?            @relation(fields: [ubicacion_id], references: [id])
 
   movimientos          movimientos[]
   bienes_hoja_ruta     bienes_hoja_ruta[]
   registros_inventario registros_inventario[]
   documentos           documento[]
+  ajustes_valor        ajuste_valor[]
+  novedades            novedad[]
 
   @@map("bien")
 }
@@ -329,32 +345,31 @@ model tarea {
   creado_por_id      String
   fecha_inicio       DateTime          @default(now()) @db.Timestamptz(3)
   fecha_finalizacion DateTime?         @db.Timestamptz(3)
-  deriva_en_procesos Boolean?
   gestion            Int
 
-  creado_por         Usuario            @relation("TareaCreadoPor", fields: [creado_por_id], references: [id])
-  procesos           procesos[]
-  hojas_ruta         hojas_ruta[]
-  tarea_supervisores tarea_supervisor[]
-  documentos         documento[]
+  creado_por     usuario         @relation("TareaCreadoPor", fields: [creado_por_id], references: [id])
+  procesos       procesos[]
+  hojas_ruta     hojas_ruta[]
+  tarea_usuarios tarea_usuario[]
+  documentos     documento[]
 
   @@map("tarea")
 }
 
-model tarea_supervisor {
-  id               String   @id @default(uuid())
+model tarea_usuario {
+  id               String       @id @default(uuid())
   tarea_id         String
   usuario_id       String
-  fecha_asignacion DateTime @default(now()) @db.Timestamptz(3)
-  rol              String?  @db.VarChar(20)
+  fecha_asignacion DateTime     @default(now()) @db.Timestamptz(3)
+  rol              rol_usuario?
 
   tarea   tarea   @relation(fields: [tarea_id], references: [id])
-  usuario Usuario @relation("TareaSupervisorUsuario", fields: [usuario_id], references: [id])
+  usuario usuario @relation("TareaUsuario", fields: [usuario_id], references: [id])
 
-  @@map("tarea_supervisor")
+  @@map("tarea_usuario")
 }
 
-model TipoProcesoCatalog {
+model tipo_proceso {
   id                           String            @id @default(uuid())
   codigo                       String            @unique @db.VarChar(30)
   nombre                       String            @db.VarChar(150)
@@ -380,15 +395,15 @@ model procesos {
   tipo_proceso_id    String
   autorizado_por_id  String?
   fecha_autorizacion DateTime?      @default(now()) @db.Timestamptz(3)
-  cerrado_por        String?
+  cerrado_por_id     String?
   fecha_cierre       DateTime?      @db.Timestamptz(3)
   descripcion        String?
   observaciones      String?
 
-  tarea               tarea              @relation(fields: [tarea_id], references: [id])
-  tipo_proceso        TipoProcesoCatalog @relation(fields: [tipo_proceso_id], references: [id])
-  autorizado_por      Usuario?           @relation("ProcesoAutorizadoPor", fields: [autorizado_por_id], references: [id])
-  cerrado_por_usuario Usuario?           @relation("ProcesoCerradoPor", fields: [cerrado_por], references: [id])
+  tarea               tarea        @relation(fields: [tarea_id], references: [id])
+  tipo_proceso        tipo_proceso @relation(fields: [tipo_proceso_id], references: [id])
+  autorizado_por      usuario?     @relation("ProcesoAutorizadoPor", fields: [autorizado_por_id], references: [id])
+  cerrado_por_usuario usuario?     @relation("ProcesoCerradoPor", fields: [cerrado_por_id], references: [id])
 
   movimientos movimientos[]
   documentos  documento[]
@@ -397,9 +412,10 @@ model procesos {
 }
 
 model movimientos {
-  id                     String  @id @default(uuid())
+  id                     String            @id @default(uuid())
   proceso_id             String
   bien_id                String
+  estado                 estado_movimiento @default(solicitud)
   unidad_origen_id       String?
   ubicacion_origen_id    String?
   responsable_origen_id  String?
@@ -414,11 +430,11 @@ model movimientos {
 
   unidad_origen      unidad_organizacional? @relation("MovUnidadOrigen", fields: [unidad_origen_id], references: [id])
   ubicacion_origen   ubicacion?             @relation("MovUbicacionOrigen", fields: [ubicacion_origen_id], references: [id])
-  responsable_origen Persona?               @relation("MovResponsableOrigen", fields: [responsable_origen_id], references: [id])
+  responsable_origen persona?               @relation("MovResponsableOrigen", fields: [responsable_origen_id], references: [id])
 
   unidad_destino      unidad_organizacional? @relation("MovUnidadDestino", fields: [unidad_destino_id], references: [id])
   ubicacion_destino   ubicacion?             @relation("MovUbicacionDestino", fields: [ubicacion_destino_id], references: [id])
-  responsable_destino Persona?               @relation("MovResponsableDestino", fields: [responsable_destino_id], references: [id])
+  responsable_destino persona?               @relation("MovResponsableDestino", fields: [responsable_destino_id], references: [id])
 
   detalles_salida_temporal detalles_salida_temporal?
 
@@ -436,9 +452,27 @@ model detalles_salida_temporal {
   @@map("detalles_salida_temporal")
 }
 
+model evento_inventario {
+  id           String                   @id @default(uuid())
+  nombre       String                   @db.VarChar(150)
+  gestion_id   String?
+  estado       estado_evento_inventario @default(planificado)
+  alcance      String?
+  fecha_inicio DateTime?                @db.Date
+  fecha_cierre DateTime?                @db.Date
+  creado_en    DateTime                 @default(now()) @db.Timestamptz(3)
+
+  gestion    gestion?     @relation(fields: [gestion_id], references: [id])
+  hojas_ruta hojas_ruta[]
+  novedades  novedad[]
+
+  @@map("evento_inventario")
+}
+
 model hojas_ruta {
   id                   String           @id @default(uuid())
   tarea_id             String
+  evento_inventario_id String?
   codigo               String           @db.VarChar(50)
   nombre               String           @db.VarChar(150)
   descripcion          String?
@@ -456,25 +490,27 @@ model hojas_ruta {
   creado_en            DateTime?        @db.Timestamptz(3)
   actualizado_en       DateTime?        @db.Timestamptz(3)
 
-  tarea        tarea                  @relation(fields: [tarea_id], references: [id])
-  unidad       unidad_organizacional? @relation("HojaRutaUnidad", fields: [unidad_id], references: [id])
-  ubicacion    ubicacion?             @relation(fields: [ubicacion_id], references: [id])
-  unidad_costo unidad_organizacional? @relation("HojaRutaUnidadCosto", fields: [unidad_costo_id], references: [id])
-  asignado_a   Usuario?               @relation("HojaRutaAsignadoA", fields: [asignado_a_id], references: [id])
-  supervisor   Usuario?               @relation("HojaRutaSupervisor", fields: [supervisor_id], references: [id])
+  tarea             tarea                  @relation(fields: [tarea_id], references: [id])
+  evento_inventario evento_inventario?     @relation(fields: [evento_inventario_id], references: [id])
+  unidad            unidad_organizacional? @relation("HojaRutaUnidad", fields: [unidad_id], references: [id])
+  ubicacion         ubicacion?             @relation(fields: [ubicacion_id], references: [id])
+  unidad_costo      unidad_organizacional? @relation("HojaRutaUnidadCosto", fields: [unidad_costo_id], references: [id])
+  asignado_a        usuario?               @relation("HojaRutaAsignadoA", fields: [asignado_a_id], references: [id])
+  supervisor        usuario?               @relation("HojaRutaSupervisor", fields: [supervisor_id], references: [id])
 
   bienes_hoja_ruta     bienes_hoja_ruta[]
   registros_inventario registros_inventario[]
+  novedades            novedad[]
 
   @@map("hojas_ruta")
 }
 
 model bienes_hoja_ruta {
-  id            String    @id @default(uuid())
+  id            String                @id @default(uuid())
   hoja_ruta_id  String
   bien_id       String
-  estado        String    @db.VarChar(30)
-  agregado_en   DateTime? @db.Timestamptz(3)
+  estado        estado_bien_hoja_ruta
+  agregado_en   DateTime?             @db.Timestamptz(3)
   observaciones String?
 
   hoja_ruta            hojas_ruta             @relation(fields: [hoja_ruta_id], references: [id])
@@ -491,6 +527,7 @@ model registros_inventario {
   bien_id                  String?
   codigo_leido             String?                   @db.VarChar(100)
   resultado                resultado_inspeccion
+  estado_conciliacion      estado_conciliacion?
   estado_fisico_observado  estado_fisico_inventario?
   unidad_observada_id      String?
   ubicacion_observada_id   String?
@@ -511,14 +548,31 @@ model registros_inventario {
   bien                  bien?                  @relation(fields: [bien_id], references: [id])
   unidad_observada      unidad_organizacional? @relation("RegInvUnidadObservada", fields: [unidad_observada_id], references: [id])
   ubicacion_observada   ubicacion?             @relation("RegInvUbicacionObservada", fields: [ubicacion_observada_id], references: [id])
-  responsable_observado Persona?               @relation("RegInvResponsableObservado", fields: [responsable_observado_id], references: [id])
-  inventariador         Usuario                @relation("RegInvInventariador", fields: [inventariador_id], references: [id])
-  supervisor            Usuario?               @relation("RegInvSupervisor", fields: [supervisor_id], references: [id])
+  responsable_observado persona?               @relation("RegInvResponsableObservado", fields: [responsable_observado_id], references: [id])
+  inventariador         usuario                @relation("RegInvInventariador", fields: [inventariador_id], references: [id])
+  supervisor            usuario?               @relation("RegInvSupervisor", fields: [supervisor_id], references: [id])
 
   evidencias evidencias[]
   documentos documento[]
 
   @@map("registros_inventario")
+}
+
+model novedad {
+  id                   String         @id @default(uuid())
+  evento_inventario_id String?
+  hoja_ruta_id         String?
+  bien_id              String?
+  tipo                 tipo_novedad
+  descripcion          String?
+  estado               estado_novedad @default(registrada)
+  fecha                DateTime       @default(now()) @db.Timestamptz(3)
+
+  evento_inventario evento_inventario? @relation(fields: [evento_inventario_id], references: [id])
+  hoja_ruta         hojas_ruta?        @relation(fields: [hoja_ruta_id], references: [id])
+  bien              bien?              @relation(fields: [bien_id], references: [id])
+
+  @@map("novedad")
 }
 
 model evidencias {
@@ -531,7 +585,7 @@ model evidencias {
   creado_en              DateTime? @db.Timestamptz(3)
 
   registro_inventario registros_inventario @relation(fields: [registro_inventario_id], references: [id])
-  cargado_por         Usuario?             @relation("EvidenciaCargadoPor", fields: [cargado_por_id], references: [id])
+  cargado_por         usuario?             @relation("EvidenciaCargadoPor", fields: [cargado_por_id], references: [id])
 
   @@map("evidencias")
 }
@@ -546,7 +600,7 @@ model archivo {
   subido_por          String
   subido_en           DateTime @default(now()) @db.Timestamptz(3)
 
-  subido_por_usuario Usuario     @relation("ArchivoSubidoPor", fields: [subido_por], references: [id])
+  subido_por_usuario usuario     @relation("ArchivoSubidoPor", fields: [subido_por], references: [id])
   documentos         documento[]
 
   @@map("archivo")
@@ -573,7 +627,45 @@ model documento {
   proceso             procesos?             @relation(fields: [proceso_id], references: [id])
   tarea               tarea?                @relation(fields: [tarea_id], references: [id])
   registro_inventario registros_inventario? @relation(fields: [registro_inventario_id], references: [id])
-  subido_por_usuario  Usuario               @relation("DocumentoSubidoPor", fields: [subido_por], references: [id])
+  subido_por_usuario  usuario               @relation("DocumentoSubidoPor", fields: [subido_por], references: [id])
 
   @@map("documento")
+}
+
+model gestion {
+  id           String         @id @default(uuid())
+  anio         Int            @unique
+  estado       estado_gestion @default(abierta)
+  fecha_cierre DateTime?      @db.Date
+  creado_en    DateTime       @default(now()) @db.Timestamptz(3)
+
+  ajustes_valor      ajuste_valor[]
+  eventos_inventario evento_inventario[]
+
+  @@map("gestion")
+}
+
+
+model ajuste_valor {
+  id             String      @id @default(uuid())
+  bien_id        String
+  gestion_id     String?
+  tipo           tipo_ajuste
+  fecha          DateTime    @db.Date
+  valor_anterior Decimal     @db.Decimal
+  valor_nuevo    Decimal     @db.Decimal
+  motivo         String?
+
+  bien    bien     @relation(fields: [bien_id], references: [id])
+  gestion gestion? @relation(fields: [gestion_id], references: [id])
+
+  @@map("ajuste_valor")
+}
+
+model ufv {
+  id    String   @id @default(uuid())
+  fecha DateTime @unique @db.Date
+  valor Decimal  @db.Decimal
+
+  @@map("ufv")
 }

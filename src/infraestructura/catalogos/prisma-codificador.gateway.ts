@@ -31,7 +31,6 @@ export class PrismaCodificadorGateway implements CodificadorGateway {
       depreciable: c.depreciable,
       tasa_depreciacion: c.tasa_depreciacion?.toString() ?? null,
       vida_util_meses: c.vida_util_meses,
-      metodo_depreciacion: c.metodo_depreciacion,
       cuenta_contable: c.cuenta_contable,
     }));
   }

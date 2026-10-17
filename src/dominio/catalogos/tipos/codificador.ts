@@ -13,6 +13,5 @@ export interface CodificadorDetalle {
   depreciable: boolean;
   tasa_depreciacion: string | null;
   vida_util_meses: number | null;
-  metodo_depreciacion: string | null;
   cuenta_contable: string | null;
 }

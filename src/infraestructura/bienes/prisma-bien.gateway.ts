@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { Prisma } from '../../generated/prisma/client';
 import { PrismaService } from '../base-datos/prisma.service';
 import { Bien } from '../../dominio/bienes/entidades/bien.entity';
 import type { BienGateway } from '../../dominio/bienes/gateways/bien.gateway';
@@ -138,6 +139,7 @@ export class PrismaBienGateway implements BienGateway {
         },
         unidad: { select: { id: true, codigo: true, nombre: true } },
         unidad_costo: { select: { id: true, codigo: true, nombre: true } },
+        ubicacion: { select: { nombre: true } },
         responsable: {
           select: {
             id: true,
@@ -213,7 +215,7 @@ export class PrismaBienGateway implements BienGateway {
         nombre: bien.origen_nombre,
         tipo: bien.origen_tipo,
       },
-      ubicacion: bien.ubicacion,
+      ubicacion: bien.ubicacion?.nombre ?? null,
       atributos: deserializarAtributos(bien.atributos),
       codificador: {
         id: bien.codificador.id,
@@ -275,7 +277,7 @@ export class PrismaBienGateway implements BienGateway {
   }
 
   async existeNumero(numero: number): Promise<boolean> {
-    const existente = await this.prisma.bien.findUnique({
+    const existente = await this.prisma.bien.findFirst({
       where: { numero },
       select: { id: true },
     });
@@ -287,11 +289,13 @@ export class PrismaBienGateway implements BienGateway {
     componentes: NuevoBien[],
   ): Promise<BienCreado> {
     return this.prisma.$transaction(async (tx) => {
+      const { ubicacion: ubicacionPadre, ...datosPadre } = padre;
       const bienPadre = await tx.bien.create({
         data: {
-          ...padre,
+          ...datosPadre,
           atributos: serializarAtributos(padre.atributos),
           numero: await this.generarNumero(tx),
+          ubicacion_id: await this.resolverUbicacionId(tx, ubicacionPadre),
         },
       });
 
@@ -301,12 +305,18 @@ export class PrismaBienGateway implements BienGateway {
         descripcion: string;
       }[] = [];
       for (const componente of componentes) {
+        const { ubicacion: ubicacionComponente, ...datosComponente } =
+          componente;
         const creado = await tx.bien.create({
           data: {
-            ...componente,
+            ...datosComponente,
             atributos: serializarAtributos(componente.atributos),
             padre_id: bienPadre.id,
             numero: await this.generarNumero(tx),
+            ubicacion_id: await this.resolverUbicacionId(
+              tx,
+              ubicacionComponente,
+            ),
           },
         });
         bienesComponentes.push({
@@ -325,22 +335,28 @@ export class PrismaBienGateway implements BienGateway {
     });
   }
 
-  private async generarNumero(tx: {
-    bien: {
-      findUnique: (args: {
-        where: { numero: number };
-        select: { id: boolean };
-      }) => Promise<{ id: string } | null>;
-    };
-  }): Promise<number> {
+  private async generarNumero(tx: Prisma.TransactionClient): Promise<number> {
     for (let intento = 0; intento < 20; intento += 1) {
       const numero = Math.floor(10000 + Math.random() * 90000);
-      const existente = await tx.bien.findUnique({
+      const existente = await tx.bien.findFirst({
         where: { numero },
         select: { id: true },
       });
       if (!existente) return numero;
     }
     throw new BadRequestException('No se pudo generar un número NIA/NIM único');
+  }
+
+  private async resolverUbicacionId(
+    tx: Prisma.TransactionClient,
+    nombre: string | null,
+  ): Promise<string | null> {
+    const buscado = nombre?.trim();
+    if (!buscado) return null;
+    const ubicacion = await tx.ubicacion.findFirst({
+      where: { nombre: buscado },
+      select: { id: true },
+    });
+    return ubicacion?.id ?? null;
   }
 }
