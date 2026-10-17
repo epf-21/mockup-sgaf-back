@@ -5,6 +5,7 @@ import { CatalogosModule } from './presentacion/catalogos/catalogos.module';
 import { UnidadesModule } from './presentacion/unidades/unidades.module';
 import { PersonasModule } from './presentacion/personas/personas.module';
 import { BienesModule } from './presentacion/bienes/bienes.module';
+import { TareasModule } from './presentacion/tareas/tareas.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { BienesModule } from './presentacion/bienes/bienes.module';
     UnidadesModule,
     PersonasModule,
     BienesModule,
+    TareasModule,
   ],
   controllers: [],
 })

@@ -338,6 +338,7 @@ model bien {
 
 model tarea {
   id                 String            @id @default(uuid())
+  codigo             String            @unique @db.VarChar(30)
   nombre             String            @db.VarChar(100)
   descripcion        String?
   estado             estado_tarea
