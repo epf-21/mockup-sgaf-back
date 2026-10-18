@@ -6,6 +6,7 @@ import { UnidadesModule } from './presentacion/unidades/unidades.module';
 import { PersonasModule } from './presentacion/personas/personas.module';
 import { BienesModule } from './presentacion/bienes/bienes.module';
 import { TareasModule } from './presentacion/tareas/tareas.module';
+import { ProcesosModule } from './presentacion/procesos/procesos.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { TareasModule } from './presentacion/tareas/tareas.module';
     PersonasModule,
     BienesModule,
     TareasModule,
+    ProcesosModule,
   ],
   controllers: [],
 })
