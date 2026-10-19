@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../base-datos/prisma.service';
 import type { ReferenciasTareaGateway } from '../../dominio/tareas/gateways/referencias-tarea.gateway';
+import type { DatosUsuarioTarea } from '../../dominio/tareas/tipos/tarea';
 
 @Injectable()
 export class PrismaReferenciasTareaGateway implements ReferenciasTareaGateway {
@@ -15,5 +16,12 @@ export class PrismaReferenciasTareaGateway implements ReferenciasTareaGateway {
     });
 
     return usuarios.map((usuario) => usuario.id);
+  }
+
+  async usuarioExiste(id: string): Promise<DatosUsuarioTarea | null> {
+    return this.prisma.usuario.findUnique({
+      where: { id },
+      select: { id: true, rol: true, activo: true },
+    });
   }
 }

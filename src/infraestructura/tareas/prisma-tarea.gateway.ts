@@ -146,7 +146,7 @@ export class PrismaTareaGateway implements TareaGateway {
             fecha_cierre: true,
             tipo_proceso: { select: { codigo: true, nombre: true } },
           },
-          orderBy: { fecha_autorizacion: 'desc' },
+          orderBy: { codigo: 'desc' },
         },
       },
     });
@@ -198,6 +198,16 @@ export class PrismaTareaGateway implements TareaGateway {
         fecha_cierre: proceso.fecha_cierre,
       })),
     };
+  }
+
+  async cerrar(id: string, fechaFinalizacion: Date): Promise<void> {
+    await this.prisma.tarea.update({
+      where: { id },
+      data: {
+        estado: 'cerrada',
+        fecha_finalizacion: fechaFinalizacion,
+      },
+    });
   }
 
   private async generarCodigo(

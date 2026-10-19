@@ -1,4 +1,6 @@
 import type {
+  CambiosProceso,
+  DatosProcesoWorkflow,
   NuevoProceso,
   PaginacionProcesos,
   PaginaProcesoResumen,
@@ -12,4 +14,12 @@ export abstract class ProcesoGateway {
     paginacion: PaginacionProcesos,
   ): Promise<PaginaProcesoResumen>;
   abstract obtenerDetalle(id: string): Promise<ProcesoDetalle | null>;
+  abstract obtenerWorkflow(id: string): Promise<DatosProcesoWorkflow | null>;
+  abstract obtenerWorkflowPorMovimiento(
+    movimientoId: string,
+  ): Promise<DatosProcesoWorkflow | null>;
+  abstract aplicarTransicion(
+    procesoId: string,
+    cambios: CambiosProceso,
+  ): Promise<void>;
 }

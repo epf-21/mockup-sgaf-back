@@ -5,12 +5,16 @@ import {
   Inject,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
 import { CrearProcesoInputBoundary } from '../../aplicacion/procesos/crear-proceso/crear-proceso.input-boundary';
 import { ListarProcesosInputBoundary } from '../../aplicacion/procesos/listar-procesos/listar-procesos.input-boundary';
 import { ObtenerProcesoInputBoundary } from '../../aplicacion/procesos/obtener-proceso/obtener-proceso.input-boundary';
+import { TransicionarProcesoInputBoundary } from '../../aplicacion/procesos/transicionar-proceso/transicionar-proceso.input-boundary';
+import { AccionProceso } from '../../dominio/procesos/tipos/proceso';
+import { AccionProcesoBody } from './dto/accion-proceso.body';
 import { CrearProcesoBody } from './dto/crear-proceso.body';
 import { ListarProcesosQuery } from './dto/listar-procesos.query';
 import { CrearProcesoMapper } from './mappers/crear-proceso.mapper';
@@ -25,6 +29,8 @@ export class ProcesosController {
     private readonly crearProceso: CrearProcesoInputBoundary,
     @Inject(ObtenerProcesoInputBoundary)
     private readonly obtenerProceso: ObtenerProcesoInputBoundary,
+    @Inject(TransicionarProcesoInputBoundary)
+    private readonly transicionarProceso: TransicionarProcesoInputBoundary,
   ) {}
 
   @Get()
@@ -42,5 +48,57 @@ export class ProcesosController {
   @Post()
   crear(@Body() body: CrearProcesoBody) {
     return this.crearProceso.execute(CrearProcesoMapper.bodyToInput(body));
+  }
+
+  @Patch(':id/autorizar')
+  autorizar(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() body: AccionProcesoBody,
+  ) {
+    return this.transicionarProceso.execute({
+      procesoId: id,
+      accion: AccionProceso.Autorizar,
+      usuarioId: body.usuario_id,
+      observacion: body.observacion ?? null,
+    });
+  }
+
+  @Patch(':id/rechazar')
+  rechazar(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() body: AccionProcesoBody,
+  ) {
+    return this.transicionarProceso.execute({
+      procesoId: id,
+      accion: AccionProceso.Rechazar,
+      usuarioId: body.usuario_id,
+      observacion: body.observacion ?? null,
+    });
+  }
+
+  @Patch(':id/iniciar-ejecucion')
+  iniciarEjecucion(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() body: AccionProcesoBody,
+  ) {
+    return this.transicionarProceso.execute({
+      procesoId: id,
+      accion: AccionProceso.IniciarEjecucion,
+      usuarioId: body.usuario_id,
+      observacion: body.observacion ?? null,
+    });
+  }
+
+  @Patch(':id/cerrar')
+  cerrar(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() body: AccionProcesoBody,
+  ) {
+    return this.transicionarProceso.execute({
+      procesoId: id,
+      accion: AccionProceso.Cerrar,
+      usuarioId: body.usuario_id,
+      observacion: body.observacion ?? null,
+    });
   }
 }

@@ -1,6 +1,7 @@
 import { NotFoundError } from '../../../dominio/comun/errores/not-found.error';
 import { TareaNoEncontradaError } from '../../../dominio/tareas/errores/tarea-no-encontrada.error';
 import { TipoProcesoNoDisponibleError } from '../../../dominio/procesos/errores/tipo-proceso-no-disponible.error';
+import { ProcesoSinBienesError } from '../../../dominio/procesos/errores/proceso-sin-bienes.error';
 import { TipoProcesoNoEncontradoError } from '../../../dominio/procesos/errores/tipo-proceso-no-encontrado.error';
 import type { ReferenciasProcesoGateway } from '../../../dominio/procesos/gateways/referencias-proceso.gateway';
 import type { ProcesoGateway } from '../../../dominio/procesos/gateways/proceso.gateway';
@@ -35,6 +36,10 @@ export class CrearProcesoUseCase implements CrearProcesoInputBoundary {
 
     const bienes = [...new Set(input.bienes)];
 
+    if (tipo.genera_movimiento && bienes.length === 0) {
+      throw new ProcesoSinBienesError();
+    }
+
     await this.validarReferencias(
       bienes,
       (id) => this.referencias.bienExiste(id),
@@ -68,11 +73,18 @@ export class CrearProcesoUseCase implements CrearProcesoInputBoundary {
       observaciones: input.observaciones?.trim() || null,
     }));
 
+    const requiereEtapas =
+      tipo.requiere_autorizacion ||
+      tipo.requiere_ejecucion_campo ||
+      tipo.requiere_aceptacion_custodia;
+
     return this.procesos.crear({
       tarea_id: tarea.id,
       tipo_proceso_id: tipo.id,
       gestion: tarea.gestion,
-      estado: EstadoProceso.Pendiente,
+      estado: requiereEtapas
+        ? EstadoProceso.Pendiente
+        : EstadoProceso.Procesado,
       descripcion: input.descripcion?.trim() || null,
       movimientos,
     });

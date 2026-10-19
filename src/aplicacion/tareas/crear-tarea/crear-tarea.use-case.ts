@@ -23,7 +23,7 @@ export class CrearTareaUseCase implements CrearTareaInputBoundary {
     );
     const faltante = usuarios.find((id) => !existentes.has(id));
     if (faltante) {
-      throw new NotFoundError(`Usuario no encontrado: ${faltante}`);
+      throw new NotFoundError(`Usuario no encontrado`);
     }
 
     const tarea = Tarea.crear({
