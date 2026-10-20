@@ -1,8 +1,8 @@
 import type {
   DatosTareaProceso,
   DatosTipoProceso,
-  DatosUsuarioProceso,
 } from '../../../dominio/procesos/tipos/proceso';
+import type { DatosUsuarioProceso } from '../tipos/proceso';
 
 export abstract class ReferenciasProcesoRepository {
   abstract tareaExiste(id: string): Promise<DatosTareaProceso | null>;

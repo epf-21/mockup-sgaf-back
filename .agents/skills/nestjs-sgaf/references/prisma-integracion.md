@@ -22,7 +22,7 @@ UseCase -> Port (contrato) -> PrismaXRepository -> PrismaService -> PostgreSQL
 
 Reglas:
 
-- Las entradas del contrato usan tipos de dominio y las salidas usan `*.output.ts` de aplicación. Nunca tipos Prisma.
+- Las entradas del contrato usan tipos de aplicación (`aplicacion/<modulo>/tipos/`) y las salidas usan `*.output.ts`. Nunca tipos Prisma.
 - El repositorio Prisma usa `select`/`include` explícitos.
 - El repositorio Prisma traduce el resultado a los tipos de salida de aplicación.
 - El caso de uso no sabe si hay Prisma debajo.
@@ -189,7 +189,7 @@ No traduzcas todos los errores. Si no es una regla de negocio esperada, propaga 
 async listarPaginado(
   paginacion: Paginacion,
 ): Promise<ListarElementosOutput> {
-  const skip = (paginacion.pagina - 1) * paginacion.porPagina;
+  const skip = calcularOffset(paginacion);
 
   const [total, filas] = await Promise.all([
     this.prisma.elemento.count({ where: { activo: true } }),
@@ -202,21 +202,11 @@ async listarPaginado(
     }),
   ]);
 
-  const totalPaginas = Math.max(1, Math.ceil(total / paginacion.porPagina));
-
-  return {
-    datos: filas.map((fila) => this.aResumen(fila)),
+  return crearPaginaOutput(
+    filas.map((fila) => this.aResumen(fila)),
     total,
-    pagina: paginacion.pagina,
-    por_pagina: paginacion.porPagina,
-    total_paginas: totalPaginas,
-    siguiente:
-      paginacion.pagina < totalPaginas ? paginacion.pagina + 1 : null,
-    anterior:
-      paginacion.pagina > 1
-        ? Math.min(paginacion.pagina - 1, totalPaginas)
-        : null,
-  };
+    paginacion,
+  );
 }
 ```
 
@@ -280,7 +270,7 @@ Reglas:
 
 ## Checklist Prisma
 
-- [ ] El port está en `aplicacion/<modulo>/ports/`; usa tipos de dominio para entradas y `*.output.ts` para salidas.
+- [ ] El port está en `aplicacion/<modulo>/ports/`; usa `aplicacion/<modulo>/tipos/` para entradas y `*.output.ts` para salidas.
 - [ ] La implementación está en infraestructura y tiene `@Injectable()`.
 - [ ] Usa `select`/`include` explícitos.
 - [ ] Traduce modelos Prisma a los tipos de salida (`*.output.ts`).

@@ -1,4 +1,4 @@
-import type { AccionProceso } from '../../../../dominio/procesos/tipos/proceso';
+import type { AccionProceso } from '../../tipos/proceso';
 
 export interface TransicionarProcesoInput {
   procesoId: string;

@@ -1,4 +1,4 @@
-import type { DatosUsuarioTarea } from '../../../dominio/tareas/tipos/tarea';
+import type { DatosUsuarioTarea } from '../tipos/tarea';
 
 export abstract class ReferenciasTareaRepository {
   abstract usuariosExistentes(ids: string[]): Promise<string[]>;

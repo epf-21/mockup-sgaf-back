@@ -1,6 +1,4 @@
-export interface PersonaResumenOutput {
+export interface ListarPersonasOutput {
   id: string;
   nombre: string;
 }
-
-export type ListarPersonasOutput = PersonaResumenOutput[];

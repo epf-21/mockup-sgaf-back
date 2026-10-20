@@ -5,13 +5,19 @@ import type { ProcesoRepository } from '../../aplicacion/procesos/ports/proceso.
 import {
   EstadoMovimiento,
   EstadoProceso,
-  EtapaProceso,
   type CambiosProceso,
   type DatosMovimientoWorkflow,
   type DatosProcesoWorkflow,
-  type NuevoProceso,
-  type PaginacionProcesos,
 } from '../../dominio/procesos/tipos/proceso';
+import {
+  EtapaProceso,
+  type NuevoProceso,
+} from '../../aplicacion/procesos/tipos/proceso';
+import type { Paginacion } from '../../aplicacion/comun/paginacion/paginacion';
+import {
+  calcularOffset,
+  crearPaginaOutput,
+} from '../../aplicacion/comun/paginacion/paginacion';
 import type { CrearProcesoOutput } from '../../aplicacion/procesos/use-cases/crear-proceso/crear-proceso.output';
 import type { ListarProcesosOutput } from '../../aplicacion/procesos/use-cases/listar-procesos/listar-procesos.output';
 import type {
@@ -80,10 +86,8 @@ export class PrismaProcesoRepository implements ProcesoRepository {
     });
   }
 
-  async listarPaginado(
-    paginacion: PaginacionProcesos,
-  ): Promise<ListarProcesosOutput> {
-    const skip = (paginacion.pagina - 1) * paginacion.porPagina;
+  async listarPaginado(paginacion: Paginacion): Promise<ListarProcesosOutput> {
+    const skip = calcularOffset(paginacion);
 
     const [total, procesos] = await Promise.all([
       this.prisma.procesos.count(),
@@ -129,21 +133,7 @@ export class PrismaProcesoRepository implements ProcesoRepository {
       estado: proceso.estado,
     }));
 
-    const totalPaginas = Math.max(1, Math.ceil(total / paginacion.porPagina));
-
-    return {
-      datos,
-      total,
-      pagina: paginacion.pagina,
-      por_pagina: paginacion.porPagina,
-      total_paginas: totalPaginas,
-      siguiente:
-        paginacion.pagina < totalPaginas ? paginacion.pagina + 1 : null,
-      anterior:
-        paginacion.pagina > 1
-          ? Math.min(paginacion.pagina - 1, totalPaginas)
-          : null,
-    };
+    return crearPaginaOutput(datos, total, paginacion);
   }
 
   async obtenerDetalle(id: string): Promise<ObtenerProcesoOutput | null> {

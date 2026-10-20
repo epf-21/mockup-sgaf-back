@@ -1,3 +1,5 @@
+import type { PaginaOutput } from '../../../comun/paginacion/paginacion.output';
+
 export interface TareaResumenOutput {
   id: string;
   codigo: string;
@@ -8,12 +10,4 @@ export interface TareaResumenOutput {
   estado: string;
 }
 
-export interface ListarTareasOutput {
-  datos: TareaResumenOutput[];
-  total: number;
-  pagina: number;
-  por_pagina: number;
-  total_paginas: number;
-  siguiente: number | null;
-  anterior: number | null;
-}
+export type ListarTareasOutput = PaginaOutput<TareaResumenOutput>;

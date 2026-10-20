@@ -109,6 +109,7 @@ src/
 
   aplicacion/                   # Casos de uso, input boundaries, outputs y ports
     bienes/
+      tipos/bien.ts
       ports/bien.repository.ts
       ports/referencias-bien.repository.ts
       use-cases/
@@ -201,7 +202,8 @@ caso de uso.
 
 ```ts
 // src/aplicacion/bienes/ports/bien.repository.ts
-import type { NuevoBien, Paginacion } from '../../../dominio/bienes/tipos/bien';
+import type { NuevoBien } from '../tipos/bien';
+import type { Paginacion } from '../../comun/paginacion/paginacion';
 import type { CrearBienOutput } from '../use-cases/crear-bien/crear-bien.output';
 import type { ListarBienesOutput } from '../use-cases/listar-bienes/listar-bienes.output';
 import type { ObtenerDetalleBienOutput } from '../use-cases/obtener-detalle-bien/obtener-detalle-bien.output';
@@ -221,7 +223,7 @@ Reglas:
 - Vive en `aplicacion/<modulo>/ports/`.
 - El archivo termina en `.repository.ts` para ports de persistencia.
 - La clase se llama `<Modulo>Repository` o `<Concepto>Repository`.
-- Usa tipos de dominio para entradas y tipos de aplicación (`*.output.ts`) para salidas.
+- Usa tipos de aplicación (`aplicacion/<modulo>/tipos/`) para entradas de persistencia y `*.output.ts` para salidas.
 - Separa las referencias externas en su propio port (`ReferenciasBienRepository`).
 
 ### 3. Aplicación — input boundary + caso de uso
@@ -235,6 +237,8 @@ métodos internos que devuelven datos. El dominio ya no contiene modelos de lect
 
 ```ts
 // src/aplicacion/bienes/use-cases/listar-bienes/listar-bienes.output.ts
+import type { PaginaOutput } from '../../../comun/paginacion/paginacion.output';
+
 export interface BienResumenOutput {
   id: string;
   codigo: string;
@@ -246,20 +250,12 @@ export interface BienResumenOutput {
   atributos: Record<string, string>;
 }
 
-export interface ListarBienesOutput {
-  datos: BienResumenOutput[];
-  total: number;
-  pagina: number;
-  por_pagina: number;
-  total_paginas: number;
-  siguiente: number | null;
-  anterior: number | null;
-}
+export type ListarBienesOutput = PaginaOutput<BienResumenOutput>;
 ```
 
 ```ts
 // src/aplicacion/bienes/use-cases/listar-bienes/listar-bienes.input-boundary.ts
-import type { Paginacion } from '../../../../dominio/bienes/tipos/bien';
+import type { Paginacion } from '../../../comun/paginacion/paginacion';
 import type { ListarBienesOutput } from './listar-bienes.output';
 
 export abstract class ListarBienesInputBoundary {
@@ -269,7 +265,7 @@ export abstract class ListarBienesInputBoundary {
 
 ```ts
 // src/aplicacion/bienes/use-cases/listar-bienes/listar-bienes.use-case.ts
-import type { Paginacion } from '../../../../dominio/bienes/tipos/bien';
+import type { Paginacion } from '../../../comun/paginacion/paginacion';
 import type { BienRepository } from '../../ports/bien.repository';
 import type { ListarBienesInputBoundary } from './listar-bienes.input-boundary';
 import type { ListarBienesOutput } from './listar-bienes.output';
@@ -294,7 +290,11 @@ nombres y detalles propios de la base de datos.
 
 ```ts
 // src/infraestructura/bienes/prisma-bien.repository.ts
-import type { Paginacion } from '../../dominio/bienes/tipos/bien';
+import {
+  calcularOffset,
+  crearPaginaOutput,
+  type Paginacion,
+} from '../../aplicacion/comun/paginacion/paginacion';
 import type { BienRepository } from '../../aplicacion/bienes/ports/bien.repository';
 import type { ListarBienesOutput } from '../../aplicacion/bienes/use-cases/listar-bienes/listar-bienes.output';
 
@@ -303,7 +303,11 @@ export class PrismaBienRepository implements BienRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async listarPaginado(paginacion: Paginacion): Promise<ListarBienesOutput> {
-    // consultas a Prisma...
+    const skip = calcularOffset(paginacion);
+    const [total, filas] = await Promise.all([
+      // count y findMany con skip/take...
+    ]);
+    return crearPaginaOutput(filas, total, paginacion);
   }
 }
 ```
@@ -314,7 +318,7 @@ Reglas:
 - El archivo termina en `.repository.ts`.
 - La clase se llama `Prisma<Modulo>Repository`.
 - Lleva `@Injectable()` y recibe `PrismaService`.
-- Traduce modelos Prisma a tipos de dominio.
+- Traduce modelos Prisma a tipos de aplicación (`aplicacion/<modulo>/tipos/` o `*.output.ts`).
 - Usa `$transaction` para escrituras compuestas.
 
 ### 5. Presentación — DTO, mapper y controller
@@ -450,7 +454,8 @@ sepan.
   serializar/deserializar; hacia afuera se exponen como objeto `Record<string, string>`.
 - La **paginación** usa `pagina`/`por_pagina` (máx. 1000) y responde con
   `total`, `total_paginas` y los campos `siguiente`/`anterior` (número de página o
-  `null`).
+  `null`). El tipo `Paginacion` y el cálculo de metadatos viven en
+  `aplicacion/comun/paginacion/`.
 - El **filtrado** (estado, codificador, atributos) se resuelve en el **frontend**
   sobre los datos paginados, para soportar caché y modo offline (PWA).
 
@@ -467,21 +472,22 @@ Todos los módulos siguen el patrón anterior. Algunos casos:
 
 ## Checklist para agregar un módulo
 
-1. `dominio/<modulo>/tipos/` — define tipos y enums del negocio.
+1. `dominio/<modulo>/tipos/` — solo tipos y enums usados por la lógica del dominio.
 2. `dominio/<modulo>/entidades/` — entidades con las reglas de negocio.
 3. `dominio/<modulo>/errores/` — errores de negocio propios, si hacen falta.
-4. `aplicacion/<modulo>/ports/` — define los ports (clases abstractas) y los
+4. `aplicacion/<modulo>/tipos/` — tipos de entrada y persistencia que no usa el dominio.
+5. `aplicacion/<modulo>/ports/` — define los ports (clases abstractas) y los
    `*.repository.ts` de persistencia.
-5. `aplicacion/<modulo>/use-cases/<caso-de-uso>/` — input, input boundary, output y
+6. `aplicacion/<modulo>/use-cases/<caso-de-uso>/` — input, input boundary, output y
    caso de uso por operación.
-6. `aplicacion/<modulo>/use-cases/<caso-de-uso>/*.output.ts` — define las salidas
+7. `aplicacion/<modulo>/use-cases/<caso-de-uso>/*.output.ts` — define las salidas
    del método principal y de los métodos internos.
-7. `infraestructura/<modulo>/` — implementación Prisma de cada repository
+8. `infraestructura/<modulo>/` — implementación Prisma de cada repository
    (`prisma-<modulo>.repository.ts`).
-8. `presentacion/<modulo>/` — DTOs, mappers, controller y `.module.ts`.
-9. Registra el módulo en `app.module.ts`.
-10. Verifica con `bun run build` y `bun run lint`.
-11. Confirma que `dominio/` no importa `aplicacion/` ni `infraestructura`.
+9. `presentacion/<modulo>/` — DTOs, mappers, controller y `.module.ts`.
+10. Registra el módulo en `app.module.ts`.
+11. Verifica con `bun run build` y `bun run lint`.
+12. Confirma que `dominio/` no importa `aplicacion/` ni `infraestructura`.
 
 ## Notas de infraestructura
 

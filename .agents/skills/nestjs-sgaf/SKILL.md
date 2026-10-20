@@ -76,10 +76,12 @@ src/
     <modulo>/
       entidades/          Entidades y reglas de negocio
       errores/            Errores de dominio del módulo
-      tipos/              Tipos, enums e interfaces del dominio
-    comun/errores/        Errores base compartidos
+      tipos/              Solo tipos y enums usados por la lógica del dominio
+    comun/
+      errores/            Errores base compartidos
   aplicacion/             Casos de uso, boundaries, outputs y ports. Sin NestJS ni Prisma.
     <modulo>/
+      tipos/              Tipos de entrada, persistencia y contratos de aplicación
       use-cases/
         <accion>/
           <accion>.input.ts
@@ -88,7 +90,9 @@ src/
           <accion>.use-case.ts
       ports/
         <modulo>.repository.ts
-    comun/ports/reloj.port.ts
+    comun/
+      paginacion/            PaginaOutput + cálculo compartido
+      ports/reloj.port.ts
   infraestructura/        Adaptadores concretos.
     base-datos/           PrismaModule, PrismaService
     comun/                RelojSistema, DomainExceptionFilter
@@ -171,6 +175,7 @@ Lee solo la referencia que necesites para la tarea; no cargues las seis si el ca
 - [ ] El controller solo valida, mapea y delega.
 - [ ] El port está declarado en `aplicacion/<modulo>/ports/` como clase abstracta.
 - [ ] Las salidas del caso de uso están en `aplicacion/<modulo>/use-cases/<accion>/*.output.ts`.
+- [ ] La paginación reutiliza `Paginacion` y los helpers de `aplicacion/comun/paginacion/`.
 - [ ] El adaptador Prisma implementa el port desde infraestructura.
 - [ ] El provider usa `useFactory` + `inject` cuando corresponde.
 - [ ] El módulo registra controllers y providers.

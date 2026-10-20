@@ -5,10 +5,7 @@ import { RolNoAutorizadoError } from '../../../../dominio/procesos/errores/rol-n
 import { UsuarioNoEncontradoError } from '../../../../dominio/comun/errores/usuario-no-encontrado.error';
 import type { ProcesoRepository } from '../../ports/proceso.repository';
 import type { ReferenciasProcesoRepository } from '../../ports/referencias-proceso.repository';
-import {
-  ROLES_EJECUCION,
-  type DatosUsuarioProceso,
-} from '../../../../dominio/procesos/tipos/proceso';
+import { ROLES_EJECUCION, type DatosUsuarioProceso } from '../../tipos/proceso';
 import type { CompletarMovimientoOutput } from './completar-movimiento.output';
 import type { CompletarMovimientoInput } from './completar-movimiento.input';
 import type { CompletarMovimientoInputBoundary } from './completar-movimiento.input-boundary';

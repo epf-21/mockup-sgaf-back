@@ -1,3 +1,5 @@
+import type { PaginaOutput } from '../../../comun/paginacion/paginacion.output';
+
 export interface ProcesoResumenOutput {
   id: string;
   codigo: string;
@@ -11,12 +13,4 @@ export interface ProcesoResumenOutput {
   estado: string;
 }
 
-export interface ListarProcesosOutput {
-  datos: ProcesoResumenOutput[];
-  total: number;
-  pagina: number;
-  por_pagina: number;
-  total_paginas: number;
-  siguiente: number | null;
-  anterior: number | null;
-}
+export type ListarProcesosOutput = PaginaOutput<ProcesoResumenOutput>;

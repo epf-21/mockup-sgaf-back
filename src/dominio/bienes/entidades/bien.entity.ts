@@ -1,13 +1,6 @@
-import { OrigenTipo } from '../tipos/bien';
+import { OrigenTipo, DatosCreacionBien } from '../tipos/bien';
 import { DescripcionBienRequeridaError } from '../errores/descripcion-bien-requerida.error';
 import { ResponsableBienRequeridoError } from '../errores/responsable-bien-requerido.error';
-
-export interface DatosCreacionBien {
-  descripcion: string;
-  responsableId: string;
-  origenTipo: OrigenTipo;
-  patrimonial: boolean;
-}
 
 export class Bien {
   private constructor(

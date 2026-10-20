@@ -5,7 +5,7 @@ import type { ListarUnidadesInputBoundary } from './listar-unidades.input-bounda
 export class ListarUnidadesUseCase implements ListarUnidadesInputBoundary {
   constructor(private readonly repositorio: UnidadRepository) {}
 
-  execute(): Promise<ListarUnidadesOutput> {
+  execute(): Promise<ListarUnidadesOutput[]> {
     return this.repositorio.listar();
   }
 }

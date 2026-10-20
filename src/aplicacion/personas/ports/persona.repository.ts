@@ -1,3 +1,5 @@
+import { ListarPersonasOutput } from '../use-cases/listar-personas/listar-personas.output';
+
 export abstract class PersonaRepository {
-  abstract listar(): Promise<{ id: string; nombre: string }[]>;
+  abstract listar(): Promise<ListarPersonasOutput[]>;
 }

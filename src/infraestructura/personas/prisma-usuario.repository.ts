@@ -6,7 +6,7 @@ import type { UsuarioRepository } from '../../aplicacion/personas/ports/usuario.
 export class PrismaUsuarioRepository implements UsuarioRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async listarActivosGestion() {
+  async listar() {
     const usuarios = await this.prisma.usuario.findMany({
       where: {
         activo: true,

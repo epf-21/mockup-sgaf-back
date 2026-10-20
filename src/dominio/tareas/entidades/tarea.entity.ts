@@ -1,14 +1,9 @@
-import { CategoriaProceso, EstadoTarea } from '../tipos/tarea';
+import {
+  CategoriaProceso,
+  EstadoTarea,
+  DatosCreacionTarea,
+} from '../tipos/tarea';
 import { NombreTareaRequeridoError } from '../errores/nombre-tarea-requerido.error';
-
-export interface DatosCreacionTarea {
-  nombre: string;
-  categoria: CategoriaProceso;
-  creadoPorId: string;
-  estado: EstadoTarea;
-  supervisores: string[];
-  inventariadores: string[];
-}
 
 export class Tarea {
   private constructor(

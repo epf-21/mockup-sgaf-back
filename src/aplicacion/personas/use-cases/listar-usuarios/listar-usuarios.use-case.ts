@@ -5,7 +5,7 @@ import type { ListarUsuariosInputBoundary } from './listar-usuarios.input-bounda
 export class ListarUsuariosUseCase implements ListarUsuariosInputBoundary {
   constructor(private readonly repositorio: UsuarioRepository) {}
 
-  execute(): Promise<ListarUsuariosOutput> {
-    return this.repositorio.listarActivosGestion();
+  execute(): Promise<ListarUsuariosOutput[]> {
+    return this.repositorio.listar();
   }
 }

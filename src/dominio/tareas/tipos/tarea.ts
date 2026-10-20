@@ -6,8 +6,6 @@ export enum EstadoTarea {
   Cancelada = 'cancelada',
 }
 
-export const ROLES_CIERRE_TAREA: readonly string[] = ['administrador'];
-
 export enum CategoriaProceso {
   Alta = 'alta',
   Baja = 'baja',
@@ -18,24 +16,11 @@ export enum CategoriaProceso {
   Prestamo = 'prestamo',
 }
 
-export type NuevaTarea = {
+export interface DatosCreacionTarea {
   nombre: string;
-  descripcion: string | null;
   categoria: CategoriaProceso;
-  creado_por_id: string;
-  gestion: number;
+  creadoPorId: string;
   estado: EstadoTarea;
   supervisores: string[];
   inventariadores: string[];
-};
-
-export interface DatosUsuarioTarea {
-  id: string;
-  rol: string;
-  activo: boolean;
-}
-
-export interface Paginacion {
-  pagina: number;
-  porPagina: number;
 }

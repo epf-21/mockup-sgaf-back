@@ -5,7 +5,7 @@ import { ProcesoSinBienesError } from '../../../../dominio/procesos/errores/proc
 import { TipoProcesoNoEncontradoError } from '../../../../dominio/procesos/errores/tipo-proceso-no-encontrado.error';
 import type { ReferenciasProcesoRepository } from '../../ports/referencias-proceso.repository';
 import type { ProcesoRepository } from '../../ports/proceso.repository';
-import type { DatosMovimiento } from '../../../../dominio/procesos/tipos/proceso';
+import type { DatosMovimiento } from '../../tipos/proceso';
 import type { CrearProcesoOutput } from './crear-proceso.output';
 import { EstadoProceso } from '../../../../dominio/procesos/tipos/proceso';
 import type { CrearProcesoInput } from './crear-proceso.input';

@@ -1,3 +1,5 @@
-import type { UsuarioResumen } from '../../ports/usuario.repository';
-
-export type ListarUsuariosOutput = UsuarioResumen[];
+export interface ListarUsuariosOutput {
+  id: string;
+  nombre: string;
+  rol: string;
+}

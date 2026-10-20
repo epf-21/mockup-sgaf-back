@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../base-datos/prisma.service';
 import type { ReferenciasTareaRepository } from '../../aplicacion/tareas/ports/referencias-tarea.repository';
-import type { DatosUsuarioTarea } from '../../dominio/tareas/tipos/tarea';
+import type { DatosUsuarioTarea } from '../../aplicacion/tareas/tipos/tarea';
 
 @Injectable()
 export class PrismaReferenciasTareaRepository implements ReferenciasTareaRepository {

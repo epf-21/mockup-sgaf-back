@@ -1,4 +1,4 @@
-import type { Paginacion } from '../../../../dominio/bienes/tipos/bien';
+import type { Paginacion } from '../../../comun/paginacion/paginacion';
 import type { ListarBienesOutput } from './listar-bienes.output';
 
 export abstract class ListarBienesInputBoundary {

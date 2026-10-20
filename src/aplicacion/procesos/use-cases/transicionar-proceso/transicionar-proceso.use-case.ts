@@ -5,14 +5,14 @@ import { TransicionProcesoInvalidaError } from '../../../../dominio/procesos/err
 import { UsuarioNoEncontradoError } from '../../../../dominio/comun/errores/usuario-no-encontrado.error';
 import type { ProcesoRepository } from '../../ports/proceso.repository';
 import type { ReferenciasProcesoRepository } from '../../ports/referencias-proceso.repository';
+import type { CambiosProceso } from '../../../../dominio/procesos/tipos/proceso';
 import {
   AccionProceso,
   ROLES_AUTORIZACION,
   ROLES_CIERRE_PROCESO,
   ROLES_EJECUCION,
-  type CambiosProceso,
   type DatosUsuarioProceso,
-} from '../../../../dominio/procesos/tipos/proceso';
+} from '../../tipos/proceso';
 import type { TransicionarProcesoOutput } from './transicionar-proceso.output';
 import type { Reloj } from '../../../comun/ports/reloj.port';
 import type { TransicionarProcesoInput } from './transicionar-proceso.input';

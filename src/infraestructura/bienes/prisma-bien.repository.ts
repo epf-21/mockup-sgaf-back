@@ -6,8 +6,12 @@ import type { BienRepository } from '../../aplicacion/bienes/ports/bien.reposito
 import type {
   AtributosBien,
   NuevoBien,
-  Paginacion,
-} from '../../dominio/bienes/tipos/bien';
+} from '../../aplicacion/bienes/tipos/bien';
+import type { Paginacion } from '../../aplicacion/comun/paginacion/paginacion';
+import {
+  calcularOffset,
+  crearPaginaOutput,
+} from '../../aplicacion/comun/paginacion/paginacion';
 import type { CrearBienOutput } from '../../aplicacion/bienes/use-cases/crear-bien/crear-bien.output';
 import type { ListarBienesOutput } from '../../aplicacion/bienes/use-cases/listar-bienes/listar-bienes.output';
 import type { ObtenerDetalleBienOutput } from '../../aplicacion/bienes/use-cases/obtener-detalle-bien/obtener-detalle-bien.output';
@@ -60,7 +64,7 @@ export class PrismaBienRepository implements BienRepository {
 
   async listarPaginado(paginacion: Paginacion): Promise<ListarBienesOutput> {
     const where = { padre_id: null };
-    const skip = (paginacion.pagina - 1) * paginacion.porPagina;
+    const skip = calcularOffset(paginacion);
 
     const [total, bienes] = await Promise.all([
       this.prisma.bien.count({ where }),
@@ -113,21 +117,7 @@ export class PrismaBienRepository implements BienRepository {
       atributos: deserializarAtributos(bien.atributos),
     }));
 
-    const totalPaginas = Math.max(1, Math.ceil(total / paginacion.porPagina));
-
-    return {
-      datos,
-      total,
-      pagina: paginacion.pagina,
-      por_pagina: paginacion.porPagina,
-      total_paginas: totalPaginas,
-      siguiente:
-        paginacion.pagina < totalPaginas ? paginacion.pagina + 1 : null,
-      anterior:
-        paginacion.pagina > 1
-          ? Math.min(paginacion.pagina - 1, totalPaginas)
-          : null,
-    };
+    return crearPaginaOutput(datos, total, paginacion);
   }
 
   async obtenerDetalle(id: string): Promise<ObtenerDetalleBienOutput | null> {

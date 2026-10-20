@@ -4,8 +4,8 @@ import type { ReferenciasProcesoRepository } from '../../aplicacion/procesos/por
 import type {
   DatosTareaProceso,
   DatosTipoProceso,
-  DatosUsuarioProceso,
 } from '../../dominio/procesos/tipos/proceso';
+import type { DatosUsuarioProceso } from '../../aplicacion/procesos/tipos/proceso';
 
 @Injectable()
 export class PrismaReferenciasProcesoRepository implements ReferenciasProcesoRepository {

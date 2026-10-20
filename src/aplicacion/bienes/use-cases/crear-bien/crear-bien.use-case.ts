@@ -2,18 +2,15 @@ import { NotFoundError } from '../../../../dominio/comun/errores/not-found.error
 import { Bien } from '../../../../dominio/bienes/entidades/bien.entity';
 import type { BienRepository } from '../../ports/bien.repository';
 import type { ReferenciasBienRepository } from '../../ports/referencias-bien.repository';
-import type {
-  ConstruirComponenteOutput,
-  ConstruirPadreOutput,
-  CrearBienOutput,
-  NormalizarAtributosOutput,
-} from './crear-bien.output';
+import type { CrearBienOutput } from './crear-bien.output';
+import { OrigenTipo } from '../../../../dominio/bienes/tipos/bien';
 import {
+  AtributosBien,
   EstadoBien,
   EstadoFisico,
-  OrigenTipo,
+  NuevoBien,
   TipoDocumentoAdq,
-} from '../../../../dominio/bienes/tipos/bien';
+} from '../../tipos/bien';
 import type { CrearBienInput, CrearComponenteInput } from './crear-bien.input';
 import type { CrearBienInputBoundary } from './crear-bien.input-boundary';
 
@@ -28,27 +25,23 @@ export class CrearBienUseCase implements CrearBienInputBoundary {
       input.codificadorId,
     );
     if (!codificador) {
-      throw new NotFoundError(
-        `Codificador no encontrado: ${input.codificadorId}`,
-      );
+      throw new NotFoundError('Codificador no encontrado.');
     }
 
     if (!(await this.referencias.unidadExiste(input.unidadId))) {
-      throw new NotFoundError(`Unidad no encontrada: ${input.unidadId}`);
+      throw new NotFoundError('Unidad no encontrada.');
     }
 
     if (!(await this.referencias.personaExiste(input.responsableId))) {
-      throw new NotFoundError(
-        `Persona responsable no encontrada: ${input.responsableId}`,
-      );
+      throw new NotFoundError('Persona responsable no encontrada.');
     }
 
     const padre = this.construirPadre(input, codificador.id);
 
-    const componentes: ConstruirComponenteOutput[] = [];
-    for (const [index, componente] of (input.componentes ?? []).entries()) {
+    const componentes: NuevoBien[] = [];
+    for (const componente of input.componentes ?? []) {
       componentes.push(
-        await this.construirComponente(componente, index, {
+        await this.construirComponente(componente, {
           unidad_id: padre.unidad_id,
           responsable_id: padre.responsable_id,
           ubicacion: padre.ubicacion,
@@ -64,7 +57,7 @@ export class CrearBienUseCase implements CrearBienInputBoundary {
   private construirPadre(
     input: CrearBienInput,
     codificadorId: string,
-  ): ConstruirPadreOutput {
+  ): NuevoBien {
     const origenTipo = (input.tenencia ?? OrigenTipo.Propio) as OrigenTipo;
     const adquisicionTipo = (input.adquisicionTipoDocumento ??
       TipoDocumentoAdq.SinDocumento) as TipoDocumentoAdq;
@@ -103,7 +96,6 @@ export class CrearBienUseCase implements CrearBienInputBoundary {
 
   private async construirComponente(
     body: CrearComponenteInput,
-    index: number,
     inheritance: {
       unidad_id: string;
       responsable_id: string;
@@ -111,26 +103,22 @@ export class CrearBienUseCase implements CrearBienInputBoundary {
       adquisicion_nro_documento: string | null;
       origen_nombre: string | null;
     },
-  ): Promise<ConstruirComponenteOutput> {
+  ): Promise<NuevoBien> {
     const codificador = await this.referencias.codificadorExiste(
       body.codificadorId,
     );
     if (!codificador) {
-      throw new NotFoundError(
-        `Codificador no encontrado: ${body.codificadorId}`,
-      );
+      throw new NotFoundError('Codificador no encontrado:');
     }
 
     const unidadId = body.unidadId ?? inheritance.unidad_id;
     if (!(await this.referencias.unidadExiste(unidadId))) {
-      throw new NotFoundError(`Unidad no encontrada: ${unidadId}`);
+      throw new NotFoundError('Unidad no encontrada');
     }
 
     const responsableId = body.responsableId ?? inheritance.responsable_id;
     if (!(await this.referencias.personaExiste(responsableId))) {
-      throw new NotFoundError(
-        `Persona responsable no encontrada: ${responsableId}`,
-      );
+      throw new NotFoundError('Persona responsable no encontrada');
     }
 
     return {
@@ -157,8 +145,8 @@ export class CrearBienUseCase implements CrearBienInputBoundary {
 
   private normalizarAtributos(
     atributos: Record<string, unknown>,
-  ): NormalizarAtributosOutput {
-    const normalizados: NormalizarAtributosOutput = {};
+  ): AtributosBien {
+    const normalizados: AtributosBien = {};
     for (const [clave, valor] of Object.entries(atributos)) {
       if (valor === null || valor === undefined) continue;
       if (typeof valor === 'number' || typeof valor === 'boolean') {

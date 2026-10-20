@@ -103,7 +103,8 @@ Reglas:
 Un `Port` es una clase abstracta en la capa de aplicación que describe una capacidad de salida. Los ports de persistencia se llaman `Repository`.
 
 ```ts
-import type { NuevoBien, Paginacion } from '../../../../dominio/bienes/tipos/bien';
+import type { NuevoBien } from '../tipos/bien';
+import type { Paginacion } from '../../comun/paginacion/paginacion';
 import type { CrearBienOutput } from '../use-cases/crear-bien/crear-bien.output';
 import type { ListarBienesOutput } from '../use-cases/listar-bienes/listar-bienes.output';
 import type { ObtenerDetalleBienOutput } from '../use-cases/obtener-detalle-bien/obtener-detalle-bien.output';
@@ -122,15 +123,28 @@ Reglas:
 
 - Nombre `XRepository`; archivo `x.repository.ts` dentro de `aplicacion/<modulo>/ports/`.
 - Los ports que no son de persistencia usan el sufijo `.port.ts` y también viven en `aplicacion/<modulo>/ports/`.
-- Las entradas usan tipos de dominio; las salidas usan los `*.output.ts` del caso de uso. Nunca tipos Prisma ni `any`.
+- Las entradas usan tipos de aplicación (`aplicacion/<modulo>/tipos/`); las salidas usan los `*.output.ts` del caso de uso. Nunca tipos Prisma ni `any`.
 - Devuelve `null` para “no encontrado” cuando el caso de uso decide el error.
 - Separa referencias externas en un port propio (`ReferenciasBienRepository`) para no mezclar persistencia con validación de catálogos.
 
 ### Tipos
 
-Los tipos e enums de dominio viven en `dominio/<modulo>/tipos/`. Usa `interface` para estructuras y `enum` para valores cerrados.
+En `dominio/<modulo>/tipos/` viven solo los tipos y enums que usa la lógica del
+dominio. Los tipos de entrada, persistencia y contratos de aplicación viven en
+`aplicacion/<modulo>/tipos/`. Usa `interface` para estructuras y `enum` para valores
+cerrados.
 
 ```ts
+// dominio/procesos/tipos/proceso.ts
+export enum EstadoProceso {
+  Pendiente = 'pendiente',
+  Procesado = 'procesado',
+  Cerrado = 'cerrado',
+}
+```
+
+```ts
+// aplicacion/procesos/tipos/proceso.ts
 export enum AccionProceso {
   Autorizar = 'autorizar',
   Rechazar = 'rechazar',
@@ -140,6 +154,9 @@ export enum AccionProceso {
 ```
 
 ## Aplicación
+
+La paginación es compartida: `Paginacion`, la normalización, el offset y los metadatos
+viven en `aplicacion/comun/paginacion/`. No dupliques esos cálculos por módulo.
 
 Cada operación tiene cuatro archivos en `aplicacion/<modulo>/use-cases/<accion>/`:
 
@@ -395,13 +412,14 @@ HTTP -> ValidationPipe -> Controller -> Mapper -> InputBoundary
 
 ## Checklist para un módulo nuevo
 
-1. Tipos y entidad en `dominio/<modulo>/`.
+1. Solo los tipos usados por la lógica y la entidad en `dominio/<modulo>/tipos/`.
 2. Errores específicos en `dominio/<modulo>/errores/`.
 3. Ports en `aplicacion/<modulo>/ports/`.
-4. Inputs, outputs, boundaries y use cases en `aplicacion/<modulo>/use-cases/`.
-5. Implementaciones Prisma en `infraestructura/<modulo>/`.
-6. DTOs, mappers, controller y módulo en `presentacion/<modulo>/`.
-7. Registro en `presentacion/<modulo>/<modulo>.module.ts` y en `src/app.module.ts`.
-8. `bun run build` y `bun run lint`.
+4. Tipos de entrada y persistencia en `aplicacion/<modulo>/tipos/`.
+5. Inputs, outputs, boundaries y use cases en `aplicacion/<modulo>/use-cases/`.
+6. Implementaciones Prisma en `infraestructura/<modulo>/`.
+7. DTOs, mappers, controller y módulo en `presentacion/<modulo>/`.
+8. Registro en `presentacion/<modulo>/<modulo>.module.ts` y en `src/app.module.ts`.
+9. `bun run build` y `bun run lint`.
 
 Para ejemplos completos, revisa `src/presentacion/bienes/`, `src/presentacion/tareas/` y `src/presentacion/procesos/`.

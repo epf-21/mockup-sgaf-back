@@ -1,9 +1,5 @@
-export interface UsuarioResumen {
-  id: string;
-  nombre: string;
-  rol: string;
-}
+import { ListarUsuariosOutput } from '../use-cases/listar-usuarios/listar-usuarios.output';
 
 export abstract class UsuarioRepository {
-  abstract listarActivosGestion(): Promise<UsuarioResumen[]>;
+  abstract listar(): Promise<ListarUsuariosOutput[]>;
 }

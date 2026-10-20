@@ -2,7 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '../../generated/prisma/client';
 import { PrismaService } from '../base-datos/prisma.service';
 import type { TareaRepository } from '../../aplicacion/tareas/ports/tarea.repository';
-import type { NuevaTarea, Paginacion } from '../../dominio/tareas/tipos/tarea';
+import type { NuevaTarea } from '../../aplicacion/tareas/tipos/tarea';
+import type { Paginacion } from '../../aplicacion/comun/paginacion/paginacion';
+import {
+  calcularOffset,
+  crearPaginaOutput,
+} from '../../aplicacion/comun/paginacion/paginacion';
 import type { CrearTareaOutput } from '../../aplicacion/tareas/use-cases/crear-tarea/crear-tarea.output';
 import type { ListarTareasOutput } from '../../aplicacion/tareas/use-cases/listar-tareas/listar-tareas.output';
 import type { ObtenerTareaOutput } from '../../aplicacion/tareas/use-cases/obtener-tarea/obtener-tarea.output';
@@ -50,7 +55,7 @@ export class PrismaTareaRepository implements TareaRepository {
   }
 
   async listarPaginado(paginacion: Paginacion): Promise<ListarTareasOutput> {
-    const skip = (paginacion.pagina - 1) * paginacion.porPagina;
+    const skip = calcularOffset(paginacion);
 
     const [total, tareas] = await Promise.all([
       this.prisma.tarea.count(),
@@ -84,21 +89,7 @@ export class PrismaTareaRepository implements TareaRepository {
       estado: tarea.estado,
     }));
 
-    const totalPaginas = Math.max(1, Math.ceil(total / paginacion.porPagina));
-
-    return {
-      datos,
-      total,
-      pagina: paginacion.pagina,
-      por_pagina: paginacion.porPagina,
-      total_paginas: totalPaginas,
-      siguiente:
-        paginacion.pagina < totalPaginas ? paginacion.pagina + 1 : null,
-      anterior:
-        paginacion.pagina > 1
-          ? Math.min(paginacion.pagina - 1, totalPaginas)
-          : null,
-    };
+    return crearPaginaOutput(datos, total, paginacion);
   }
 
   async obtenerDetalle(id: string): Promise<ObtenerTareaOutput | null> {

@@ -1,6 +1,4 @@
-export interface UnidadResumenOutput {
+export interface ListarUnidadesOutput {
   id: string;
   nombre: string;
 }
-
-export type ListarUnidadesOutput = UnidadResumenOutput[];

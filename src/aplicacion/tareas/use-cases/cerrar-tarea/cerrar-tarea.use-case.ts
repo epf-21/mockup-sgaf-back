@@ -7,10 +7,7 @@ import { TareaSinSupervisoresError } from '../../../../dominio/tareas/errores/ta
 import { TareaYaCerradaError } from '../../../../dominio/tareas/errores/tarea-ya-cerrada.error';
 import type { ReferenciasTareaRepository } from '../../ports/referencias-tarea.repository';
 import type { TareaRepository } from '../../ports/tarea.repository';
-import {
-  ROLES_CIERRE_TAREA,
-  type DatosUsuarioTarea,
-} from '../../../../dominio/tareas/tipos/tarea';
+import { ROLES_CIERRE_TAREA, type DatosUsuarioTarea } from '../../tipos/tarea';
 import type { CerrarTareaOutput } from './cerrar-tarea.output';
 import type { CerrarTareaInput } from './cerrar-tarea.input';
 import type { CerrarTareaInputBoundary } from './cerrar-tarea.input-boundary';

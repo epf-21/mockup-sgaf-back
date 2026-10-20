@@ -1,3 +1,5 @@
+import type { PaginaOutput } from '../../../comun/paginacion/paginacion.output';
+
 export interface BienResumenOutput {
   id: string;
   codigo: string;
@@ -9,12 +11,4 @@ export interface BienResumenOutput {
   atributos: Record<string, string>;
 }
 
-export interface ListarBienesOutput {
-  datos: BienResumenOutput[];
-  total: number;
-  pagina: number;
-  por_pagina: number;
-  total_paginas: number;
-  siguiente: number | null;
-  anterior: number | null;
-}
+export type ListarBienesOutput = PaginaOutput<BienResumenOutput>;

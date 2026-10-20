@@ -13,7 +13,7 @@ import { CrearProcesoInputBoundary } from '../../aplicacion/procesos/use-cases/c
 import { ListarProcesosInputBoundary } from '../../aplicacion/procesos/use-cases/listar-procesos/listar-procesos.input-boundary';
 import { ObtenerProcesoInputBoundary } from '../../aplicacion/procesos/use-cases/obtener-proceso/obtener-proceso.input-boundary';
 import { TransicionarProcesoInputBoundary } from '../../aplicacion/procesos/use-cases/transicionar-proceso/transicionar-proceso.input-boundary';
-import { AccionProceso } from '../../dominio/procesos/tipos/proceso';
+import { AccionProceso } from '../../aplicacion/procesos/tipos/proceso';
 import { AccionProcesoBody } from './dto/accion-proceso.body';
 import { CrearProcesoBody } from './dto/crear-proceso.body';
 import { ListarProcesosQuery } from './dto/listar-procesos.query';

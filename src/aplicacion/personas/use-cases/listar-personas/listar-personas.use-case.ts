@@ -5,7 +5,7 @@ import type { ListarPersonasInputBoundary } from './listar-personas.input-bounda
 export class ListarPersonasUseCase implements ListarPersonasInputBoundary {
   constructor(private readonly repositorio: PersonaRepository) {}
 
-  execute(): Promise<ListarPersonasOutput> {
+  execute(): Promise<ListarPersonasOutput[]> {
     return this.repositorio.listar();
   }
 }

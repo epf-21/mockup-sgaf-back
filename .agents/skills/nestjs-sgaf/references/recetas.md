@@ -278,12 +278,14 @@ Si necesitas un código HTTP distinto de 400/404, actualiza `DomainExceptionFilt
 ## 7. Agregar paginación
 
 1. DTO de query con `pagina` y `por_pagina`.
-2. Mapper con defaults `1` y `10`.
+2. Mapper con `normalizarPaginacion` (defaults `1` y `10`).
 3. Port con `skip`/`take` y `count` en paralelo.
 4. Respuesta con la forma estándar.
 
 ```ts
-const skip = (paginacion.pagina - 1) * paginacion.porPagina;
+import { calcularOffset, crearPaginaOutput } from '../../aplicacion/comun/paginacion/paginacion';
+
+const skip = calcularOffset(paginacion);
 
 const [total, filas] = await Promise.all([
   this.prisma.elemento.count({ where }),
@@ -295,20 +297,11 @@ const [total, filas] = await Promise.all([
   }),
 ]);
 
-const totalPaginas = Math.max(1, Math.ceil(total / paginacion.porPagina));
-
-return {
-  datos: filas.map((fila) => this.aResumen(fila)),
+return crearPaginaOutput(
+  filas.map((fila) => this.aResumen(fila)),
   total,
-  pagina: paginacion.pagina,
-  por_pagina: paginacion.porPagina,
-  total_paginas: totalPaginas,
-  siguiente: paginacion.pagina < totalPaginas ? paginacion.pagina + 1 : null,
-  anterior:
-    paginacion.pagina > 1
-      ? Math.min(paginacion.pagina - 1, totalPaginas)
-      : null,
-};
+  paginacion,
+);
 ```
 
 ## 8. Agregar una transición de estado
