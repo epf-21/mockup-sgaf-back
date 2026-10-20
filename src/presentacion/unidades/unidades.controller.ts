@@ -1,5 +1,5 @@
 import { Controller, Get, Inject } from '@nestjs/common';
-import { ListarUnidadesInputBoundary } from '../../aplicacion/unidades/listar-unidades/listar-unidades.input-boundary';
+import { ListarUnidadesInputBoundary } from '../../aplicacion/unidades/use-cases/listar-unidades/listar-unidades.input-boundary';
 
 @Controller('unidades')
 export class UnidadesController {

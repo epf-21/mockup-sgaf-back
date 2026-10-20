@@ -5,42 +5,49 @@ desarrollada con **NestJS**, **Prisma 7** y **PostgreSQL** que administra los bi
 institucionales durante todo su ciclo de vida (alta, asignación, movimiento, baja),
 con trazabilidad de responsable, ubicación y respaldo documental.
 
-El proyecto sigue **Clean Architecture** (arquitectura limpia): el código se organiza
-en capas concéntricas donde las reglas de negocio y los contratos viven en el centro,
-y los detalles tecnológicos (NestJS, Prisma, HTTP) quedan en la periferia.
+El proyecto sigue **Clean Architecture** con contratos explícitos de entrada y salida.
+El dominio concentra las reglas de negocio; la aplicación orquesta los casos de uso y
+declara los contratos que necesita; la infraestructura implementa esos contratos y la
+presentación adapta HTTP.
 
 ## Terminología
 
-Se usa la terminología propia de Clean Architecture:
-
-- **Entidad (Entity)**: encapsula reglas de negocio del dominio.
+- **Entidad (Entity)**: encapsula reglas e invariantes de negocio.
 - **Caso de uso (Use Case / Interactor)**: orquesta una operación del sistema.
-- **Frontera de entrada (Input Boundary)**: interfaz que expone un caso de uso y por la
-  que lo invoca el mundo exterior (el controller depende de ella, no de la clase concreta).
-- **Gateway (Entity Gateway)**: interfaz con la que el caso de uso accede a la persistencia;
-  la infraestructura la implementa.
+- **Input Boundary**: contrato de entrada que implementa un caso de uso y que consume
+  el controller. Vive en la capa de aplicación.
+- **Port**: contrato de salida que declara una capacidad que el caso de uso necesita
+  (persistencia, reloj, referencias, etc.). Vive en `aplicacion/<modulo>/ports/`.
+- **Output**: contrato de salida de un caso de uso. Vive en
+  `aplicacion/<modulo>/use-cases/<accion>/<accion>.output.ts`.
+- **Repository**: port de persistencia. Se declara en un archivo `*.repository.ts` y
+  se implementa en infraestructura con un adaptador Prisma (`Prisma<Modulo>Repository`).
+- **Adapter**: implementación concreta de un port. En este proyecto, los adaptadores
+  principales son los repositorios Prisma y `RelojSistema`.
 
-> Nota: se evita a propósito la terminología de *puertos* y *adaptadores*, propia de la
-> arquitectura hexagonal. Aquí las fronteras se llaman **boundaries** y **gateways**.
+> En este proyecto no se usa la palabra *gateway*. Los contratos de salida se llaman
+> **ports**; los de persistencia, **repositories**. Los contratos de entrada siguen
+> llamándose **input boundaries**.
 
 ## ¿Por qué Clean Architecture?
 
-- **Independencia de frameworks.** El núcleo del negocio no conoce NestJS ni HTTP;
-  los casos de uso se podrían ejecutar desde un CLI o un test sin levantar la API.
-- **Independencia de la base de datos.** El dominio no conoce Prisma ni PostgreSQL;
-  solo define los **gateways** que la infraestructura implementa.
-- **Testabilidad.** Los casos de uso y las entidades se prueban sin base de datos real.
-- **Regla de dependencia.** Las dependencias siempre apuntan **hacia el dominio**.
-  Nunca al revés: el dominio no importa nada de las capas externas.
+- **Independencia de frameworks.** El dominio no conoce NestJS ni HTTP; los casos de
+  uso se podrían ejecutar desde un CLI o un test sin levantar la API.
+- **Independencia de la base de datos.** El dominio no conoce Prisma ni PostgreSQL.
+  La aplicación declara los repositorios que necesita y la infraestructura los cumple.
+- **Testabilidad.** Los casos de uso se prueban con dobles de sus ports, sin base de
+  datos real.
+- **Regla de dependencia.** Las dependencias siempre apuntan hacia el dominio. El
+  dominio no importa nada de las capas externas.
 
 ## Las cuatro capas
 
 | Capa | Responsabilidad | Depende de |
 | --- | --- | --- |
-| `dominio/` | Entidades, tipos, reglas y **gateways** (contratos). | Nadie |
-| `aplicacion/` | **Casos de uso** e **input boundaries**; orquestan el dominio. | dominio |
+| `dominio/` | Entidades, tipos, reglas y errores de negocio. | Nadie |
+| `aplicacion/` | Casos de uso, input boundaries, outputs y ports de salida. | dominio |
 | `presentacion/` | Controllers, DTOs, mappers y módulos Nest (DI). | aplicacion |
-| `infraestructura/` | Implementaciones concretas: Prisma y adaptadores. | dominio |
+| `infraestructura/` | Adaptadores concretos: repositorios Prisma, reloj, filtros. | aplicacion y dominio |
 
 ```mermaid
 flowchart TB
@@ -48,38 +55,39 @@ flowchart TB
         C[Controller] --> M[Mapper]
     end
 
-    subgraph aplicacion["aplicacion/ · Casos de uso + Input Boundaries"]
+    subgraph aplicacion["aplicacion/ · Use Cases, Input Boundaries, Outputs y Ports"]
         IB[[Input Boundary]]
         UC[UseCase]
+        P[[Repository Port]]
     end
 
-    subgraph dominio["dominio/ · Entidades, Tipos, Gateways"]
-        G[[Gateway]]
+    subgraph dominio["dominio/ · Entidades, Tipos, Errores"]
         T[Tipos / Entidades]
         E[Errores de negocio]
     end
 
     subgraph infraestructura["infraestructura/ · Prisma, Adaptadores"]
-        R[Prisma Gateway]
+        R[Prisma Repository]
     end
 
     C -. depende de .-> IB
     UC -. implementa .-> IB
-    M --> UC
-    UC --> G
+    M --> IB
+    IB --> UC
+    UC --> P
     UC --> T
     UC --> E
-    R -. implementa .-> G
+    R -. implementa .-> P
     R --> DB[(PostgreSQL)]
 
     presentacion -. usa .-> aplicacion
     aplicacion -. usa .-> dominio
-    infraestructura -. implementa .-> dominio
+    infraestructura -. implementa .-> aplicacion
 ```
 
-La flecha punteada `Prisma Gateway -. implementa .-> Gateway` es la **inversión de
-dependencias**: el dominio define el contrato y la infraestructura lo cumple, de modo
-que el caso de uso nunca importa Prisma.
+La flecha `Prisma Repository -. implementa .-> Repository Port` es la **inversión de
+dependencias**: la aplicación define el contrato y la infraestructura lo cumple, de
+modo que el caso de uso nunca importa Prisma.
 
 ## Estructura de carpetas
 
@@ -87,35 +95,39 @@ La estructura va **primero por capa y luego por módulo**:
 
 ```text
 src/
-  dominio/                      # Reglas y contratos (sin NestJS, sin Prisma)
+  dominio/                      # Reglas de negocio (sin NestJS, sin Prisma)
     bienes/
-      entidades/bien.entity.ts  # Entidad con reglas de negocio
-      gateways/bien.gateway.ts   # Contratos de persistencia
-      gateways/referencias-bien.gateway.ts
+      entidades/bien.entity.ts
       errores/bien-no-encontrado.error.ts
-      tipos/bien.ts             # Tipos y enums del módulo
-    catalogos/
-      gateways/codificador.gateway.ts
-      tipos/codificador.ts
-    personas/
-      gateways/persona.gateway.ts
-      gateways/usuario.gateway.ts
-    unidades/
-      gateways/unidad.gateway.ts
-    comun/errores/              # Errores base reutilizables (DomainError, etc.)
+      tipos/bien.ts
+    procesos/
+      entidades/proceso-workflow.entity.ts
+      errores/
+      tipos/proceso.ts
+    tareas/tipos/
+    comun/errores/              # DomainError, BusinessRuleError, NotFoundError
 
-  aplicacion/                   # Casos de uso + input boundaries
+  aplicacion/                   # Casos de uso, input boundaries, outputs y ports
     bienes/
-      listar-bienes/listar-bienes.use-case.ts
-      listar-bienes/listar-bienes.input-boundary.ts
-      crear-bien/crear-bien.use-case.ts
-      crear-bien/crear-bien.input-boundary.ts
-      crear-bien/crear-bien.input.ts
-      obtener-detalle-bien/obtener-detalle-bien.use-case.ts
-      obtener-detalle-bien/obtener-detalle-bien.input-boundary.ts
-    catalogos/
-    personas/
-    unidades/
+      ports/bien.repository.ts
+      ports/referencias-bien.repository.ts
+      use-cases/
+        listar-bienes/
+          listar-bienes.use-case.ts
+          listar-bienes.input-boundary.ts
+          listar-bienes.input.ts
+          listar-bienes.output.ts
+        crear-bien/
+          crear-bien.use-case.ts
+          crear-bien.input-boundary.ts
+          crear-bien.input.ts
+          crear-bien.output.ts
+    catalogos/use-cases/
+    personas/use-cases/
+    procesos/use-cases/
+    tareas/use-cases/
+    unidades/use-cases/
+    comun/ports/reloj.port.ts
 
   presentacion/                 # Adaptadores de entrada (HTTP)
     bienes/
@@ -126,6 +138,8 @@ src/
       mappers/crear-bien.mapper.ts
     catalogos/
     personas/
+    procesos/
+    tareas/
     unidades/
 
   infraestructura/              # Adaptadores de salida (detalles técnicos)
@@ -133,12 +147,15 @@ src/
       prisma.module.ts
       prisma.service.ts
     bienes/
-      prisma-bien.gateway.ts
-      prisma-referencias-bien.gateway.ts
-    catalogos/prisma-codificador.gateway.ts
-    personas/prisma-persona.gateway.ts
-    personas/prisma-usuario.gateway.ts
-    unidades/prisma-unidad.gateway.ts
+      prisma-bien.repository.ts
+      prisma-referencias-bien.repository.ts
+    catalogos/prisma-codificador.repository.ts
+    personas/prisma-persona.repository.ts
+    personas/prisma-usuario.repository.ts
+    procesos/prisma-proceso.repository.ts
+    tareas/prisma-tarea.repository.ts
+    unidades/prisma-unidad.repository.ts
+    comun/reloj-sistema.ts
     comun/http-exception.filter.ts
 
   app.module.ts                 # Módulo raíz: importa los módulos de presentación
@@ -175,42 +192,92 @@ export class Bien {
 }
 ```
 
-### 2. Dominio — gateway (contrato de persistencia)
+### 2. Aplicación — port de repositorio
 
-El gateway es una **clase abstracta** que actúa como token de inyección y define los
-métodos que la infraestructura debe implementar. El caso de uso depende de esta
-abstracción, no de Prisma.
+El port es una **clase abstracta** que actúa como token de inyección y define lo que
+el caso de uso necesita. No conoce Prisma ni ningún detalle de infraestructura. Sus
+salidas son contratos de aplicación declarados en los archivos `.output.ts` de cada
+caso de uso.
 
 ```ts
-// src/dominio/bienes/gateways/bien.gateway.ts
-export abstract class BienGateway {
-  abstract listarPaginado(paginacion: Paginacion): Promise<PaginaBienResumen>;
-  abstract obtenerDetalle(id: string): Promise<BienDetalle | null>;
+// src/aplicacion/bienes/ports/bien.repository.ts
+import type { NuevoBien, Paginacion } from '../../../dominio/bienes/tipos/bien';
+import type { CrearBienOutput } from '../use-cases/crear-bien/crear-bien.output';
+import type { ListarBienesOutput } from '../use-cases/listar-bienes/listar-bienes.output';
+import type { ObtenerDetalleBienOutput } from '../use-cases/obtener-detalle-bien/obtener-detalle-bien.output';
+
+export abstract class BienRepository {
+  abstract listarPaginado(paginacion: Paginacion): Promise<ListarBienesOutput>;
+  abstract obtenerDetalle(id: string): Promise<ObtenerDetalleBienOutput | null>;
   abstract crearConComponentes(
     padre: NuevoBien,
     componentes: NuevoBien[],
-  ): Promise<BienCreado>;
+  ): Promise<CrearBienOutput>;
 }
 ```
+
+Reglas:
+
+- Vive en `aplicacion/<modulo>/ports/`.
+- El archivo termina en `.repository.ts` para ports de persistencia.
+- La clase se llama `<Modulo>Repository` o `<Concepto>Repository`.
+- Usa tipos de dominio para entradas y tipos de aplicación (`*.output.ts`) para salidas.
+- Separa las referencias externas en su propio port (`ReferenciasBienRepository`).
 
 ### 3. Aplicación — input boundary + caso de uso
 
 El **input boundary** es la frontera de entrada del caso de uso. El caso de uso lo
 implementa y contiene la lógica de orquestación. No conoce NestJS, HTTP ni Prisma.
 
+Cada caso de uso declara sus salidas en un archivo `.output.ts`. Ese archivo es el
+contrato de salida de la aplicación: define el tipo del método principal y de los
+métodos internos que devuelven datos. El dominio ya no contiene modelos de lectura.
+
 ```ts
-// src/aplicacion/bienes/listar-bienes/listar-bienes.input-boundary.ts
-export abstract class ListarBienesInputBoundary {
-  abstract execute(paginacion: Paginacion): Promise<PaginaBienResumen>;
+// src/aplicacion/bienes/use-cases/listar-bienes/listar-bienes.output.ts
+export interface BienResumenOutput {
+  id: string;
+  codigo: string;
+  descripcion: string;
+  codificador: string;
+  unidad: string;
+  responsable: string;
+  estado: string;
+  atributos: Record<string, string>;
+}
+
+export interface ListarBienesOutput {
+  datos: BienResumenOutput[];
+  total: number;
+  pagina: number;
+  por_pagina: number;
+  total_paginas: number;
+  siguiente: number | null;
+  anterior: number | null;
 }
 ```
 
 ```ts
-// src/aplicacion/bienes/listar-bienes/listar-bienes.use-case.ts
-export class ListarBienesUseCase implements ListarBienesInputBoundary {
-  constructor(private readonly bienes: BienGateway) {}
+// src/aplicacion/bienes/use-cases/listar-bienes/listar-bienes.input-boundary.ts
+import type { Paginacion } from '../../../../dominio/bienes/tipos/bien';
+import type { ListarBienesOutput } from './listar-bienes.output';
 
-  execute(paginacion: Paginacion) {
+export abstract class ListarBienesInputBoundary {
+  abstract execute(paginacion: Paginacion): Promise<ListarBienesOutput>;
+}
+```
+
+```ts
+// src/aplicacion/bienes/use-cases/listar-bienes/listar-bienes.use-case.ts
+import type { Paginacion } from '../../../../dominio/bienes/tipos/bien';
+import type { BienRepository } from '../../ports/bien.repository';
+import type { ListarBienesInputBoundary } from './listar-bienes.input-boundary';
+import type { ListarBienesOutput } from './listar-bienes.output';
+
+export class ListarBienesUseCase implements ListarBienesInputBoundary {
+  constructor(private readonly bienes: BienRepository) {}
+
+  execute(paginacion: Paginacion): Promise<ListarBienesOutput> {
     return this.bienes.listarPaginado(paginacion);
   }
 }
@@ -220,7 +287,37 @@ Cuando un caso de uso necesita validar reglas de negocio, delega en la entidad o
 errores del dominio (por ejemplo `BienNoEncontradoError`), que presentación traduce a
 respuestas HTTP.
 
-### 4. Presentación — DTO, mapper y controller
+### 4. Infraestructura — repositorio Prisma
+
+Implementa el port de aplicación. Es el **único lugar** que conoce Prisma. Puede tener
+nombres y detalles propios de la base de datos.
+
+```ts
+// src/infraestructura/bienes/prisma-bien.repository.ts
+import type { Paginacion } from '../../dominio/bienes/tipos/bien';
+import type { BienRepository } from '../../aplicacion/bienes/ports/bien.repository';
+import type { ListarBienesOutput } from '../../aplicacion/bienes/use-cases/listar-bienes/listar-bienes.output';
+
+@Injectable()
+export class PrismaBienRepository implements BienRepository {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async listarPaginado(paginacion: Paginacion): Promise<ListarBienesOutput> {
+    // consultas a Prisma...
+  }
+}
+```
+
+Reglas:
+
+- Vive en `infraestructura/<modulo>/`.
+- El archivo termina en `.repository.ts`.
+- La clase se llama `Prisma<Modulo>Repository`.
+- Lleva `@Injectable()` y recibe `PrismaService`.
+- Traduce modelos Prisma a tipos de dominio.
+- Usa `$transaction` para escrituras compuestas.
+
+### 5. Presentación — DTO, mapper y controller
 
 - **DTO**: valida y tipa la entrada HTTP con `class-validator`/`class-transformer`.
 - **Mapper**: traduce entre el mundo HTTP y los tipos de la aplicación.
@@ -260,38 +357,26 @@ export class BienesController {
 }
 ```
 
-### 5. Infraestructura — gateway Prisma
-
-Implementa el gateway del dominio. Es el **único lugar** que conoce Prisma. Puede tener
-nombres y detalles propios de la base de datos.
-
-```ts
-// src/infraestructura/bienes/prisma-bien.gateway.ts
-@Injectable()
-export class PrismaBienGateway implements BienGateway {
-  constructor(private readonly prisma: PrismaService) {}
-
-  async listarPaginado(paginacion: Paginacion): Promise<PaginaBienResumen> {
-    // consultas a Prisma...
-  }
-}
-```
-
 ### 6. Presentación — módulo Nest (ensamble de dependencias)
 
-El módulo no contiene lógica: sólo **cablea** gateways con implementaciones y expone
-los casos de uso a través de sus **input boundaries**.
+El módulo no contiene lógica: sólo **cablea** ports con adaptadores y expone los casos
+de uso a través de sus **input boundaries**.
 
 ```ts
 // src/presentacion/bienes/bienes.module.ts
+import { BienRepository } from '../../aplicacion/bienes/ports/bien.repository';
+import { ListarBienesInputBoundary } from '../../aplicacion/bienes/use-cases/listar-bienes/listar-bienes.input-boundary';
+import { ListarBienesUseCase } from '../../aplicacion/bienes/use-cases/listar-bienes/listar-bienes.use-case';
+import { PrismaBienRepository } from '../../infraestructura/bienes/prisma-bien.repository';
+
 @Module({
   controllers: [BienesController],
   providers: [
-    { provide: BienGateway, useClass: PrismaBienGateway },
+    { provide: BienRepository, useClass: PrismaBienRepository },
     {
       provide: ListarBienesInputBoundary,
-      useFactory: (bienes: BienGateway) => new ListarBienesUseCase(bienes),
-      inject: [BienGateway],
+      useFactory: (bienes: BienRepository) => new ListarBienesUseCase(bienes),
+      inject: [BienRepository],
     },
   ],
 })
@@ -317,8 +402,8 @@ sequenceDiagram
     participant Mapper as Mapper (presentacion)
     participant IB as ListarBienesInputBoundary (aplicacion)
     participant UseCase as ListarBienesUseCase (aplicacion)
-    participant Gateway as BienGateway (dominio)
-    participant Repo as PrismaBienGateway (infraestructura)
+    participant Port as BienRepository (aplicacion/ports)
+    participant Repo as PrismaBienRepository (infraestructura)
     participant DB as PostgreSQL
 
     Cliente->>Controller: GET /bienes?pagina=1
@@ -326,29 +411,31 @@ sequenceDiagram
     Mapper-->>Controller: Paginacion
     Controller->>IB: execute(paginacion)
     IB-->>UseCase: (implementación concreta)
-    UseCase->>Gateway: listarPaginado(paginacion)
-    Gateway-->>Repo: (implementación concreta)
+    UseCase->>Port: listarPaginado(paginacion)
+    Port-->>Repo: (implementación concreta)
     Repo->>DB: SELECT ...
     DB-->>Repo: filas
-    Repo-->>UseCase: PaginaBienResumen
-    UseCase-->>Controller: PaginaBienResumen
+    Repo-->>UseCase: ListarBienesOutput
+    UseCase-->>Controller: ListarBienesOutput
     Controller-->>Cliente: 200 JSON
 ```
 
 El `Controller` sólo depende del **input boundary**; el `UseCase` sólo conoce el
-**gateway**. El `PrismaBienGateway` se inyecta por debajo sin que las capas internas lo sepan.
+**port**. El `PrismaBienRepository` se inyecta por debajo sin que las capas internas lo
+sepan.
 
 ## Reglas y convenciones del proyecto
 
-- **El dominio no depende de NestJS.** Sin decoradores `@Injectable`, sin Prisma.
-- **La aplicación no depende de Prisma ni de NestJS.** Sólo usa gateways y tipos del
-  dominio; expone casos de uso mediante **input boundaries**.
-- **La infraestructura implementa los gateways del dominio.** Es la única capa con
+- **El dominio no depende de NestJS ni de Prisma.** Sin decoradores `@Injectable`, sin
+  repositorios y sin detalles técnicos.
+- **La aplicación no depende de Prisma ni de NestJS.** Usa tipos del dominio, declara
+  sus ports y expone casos de uso mediante **input boundaries**.
+- **La infraestructura implementa los ports de aplicación.** Es la única capa con
   acceso a `PrismaService`.
 - **La presentación orquesta, no decide.** Controllers finos que dependen de input
   boundaries, DTOs que validan, mappers que traducen y módulos que sólo arman la DI.
-- **Terminología Clean.** Se usa `Gateway` (Entity Gateway) e `Input Boundary`; no se
-  usa la palabra *puerto* (hexagonal).
+- **Terminología:** `Port` para contratos de salida, `Repository` para ports de
+  persistencia e `Input Boundary` para contratos de entrada. No se usa *gateway*.
 - **Nombres en español** para carpetas, tipos y conceptos del negocio.
 - **Manejo de errores.** Los errores de negocio extienden `DomainError`. Un filtro
   global (`DomainExceptionFilter`) los traduce a HTTP: `code === 'NOT_FOUND'` → `404`,
@@ -382,13 +469,19 @@ Todos los módulos siguen el patrón anterior. Algunos casos:
 
 1. `dominio/<modulo>/tipos/` — define tipos y enums del negocio.
 2. `dominio/<modulo>/entidades/` — entidades con las reglas de negocio.
-3. `dominio/<modulo>/gateways/` — define los gateways (clases abstractas).
-4. `dominio/<modulo>/errores/` — errores de negocio propios, si hacen falta.
-5. `aplicacion/<modulo>/<caso-de-uso>/` — input boundary + caso de uso por operación.
-6. `infraestructura/<modulo>/` — implementación Prisma de cada gateway.
-7. `presentacion/<modulo>/` — DTOs, mappers, controller y `.module.ts`.
-8. Registra el módulo en `app.module.ts`.
-9. Verifica con `bun run build`, `bun run lint` y `bun run test`.
+3. `dominio/<modulo>/errores/` — errores de negocio propios, si hacen falta.
+4. `aplicacion/<modulo>/ports/` — define los ports (clases abstractas) y los
+   `*.repository.ts` de persistencia.
+5. `aplicacion/<modulo>/use-cases/<caso-de-uso>/` — input, input boundary, output y
+   caso de uso por operación.
+6. `aplicacion/<modulo>/use-cases/<caso-de-uso>/*.output.ts` — define las salidas
+   del método principal y de los métodos internos.
+7. `infraestructura/<modulo>/` — implementación Prisma de cada repository
+   (`prisma-<modulo>.repository.ts`).
+8. `presentacion/<modulo>/` — DTOs, mappers, controller y `.module.ts`.
+9. Registra el módulo en `app.module.ts`.
+10. Verifica con `bun run build` y `bun run lint`.
+11. Confirma que `dominio/` no importa `aplicacion/` ni `infraestructura`.
 
 ## Notas de infraestructura
 

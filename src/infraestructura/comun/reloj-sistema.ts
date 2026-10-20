@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Reloj } from '../../dominio/comun/reloj';
+import { Reloj } from '../../aplicacion/comun/ports/reloj.port';
 
 @Injectable()
 export class RelojSistema extends Reloj {

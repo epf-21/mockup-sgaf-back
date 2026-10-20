@@ -5,7 +5,7 @@ import type {
 import type {
   CrearBienInput,
   CrearComponenteInput,
-} from '../../../aplicacion/bienes/crear-bien/crear-bien.input';
+} from '../../../aplicacion/bienes/use-cases/crear-bien/crear-bien.input';
 
 export class CrearBienMapper {
   static bodyToInput(body: CrearBienBody): CrearBienInput {

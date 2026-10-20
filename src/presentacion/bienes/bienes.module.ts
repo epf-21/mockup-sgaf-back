@@ -1,44 +1,46 @@
 import { Module } from '@nestjs/common';
-import { BienGateway } from '../../dominio/bienes/gateways/bien.gateway';
-import { ReferenciasBienGateway } from '../../dominio/bienes/gateways/referencias-bien.gateway';
-import { CrearBienInputBoundary } from '../../aplicacion/bienes/crear-bien/crear-bien.input-boundary';
-import { ListarBienesInputBoundary } from '../../aplicacion/bienes/listar-bienes/listar-bienes.input-boundary';
-import { ObtenerDetalleBienInputBoundary } from '../../aplicacion/bienes/obtener-detalle-bien/obtener-detalle-bien.input-boundary';
-import { CrearBienUseCase } from '../../aplicacion/bienes/crear-bien/crear-bien.use-case';
-import { ListarBienesUseCase } from '../../aplicacion/bienes/listar-bienes/listar-bienes.use-case';
-import { ObtenerDetalleBienUseCase } from '../../aplicacion/bienes/obtener-detalle-bien/obtener-detalle-bien.use-case';
-import { PrismaBienGateway } from '../../infraestructura/bienes/prisma-bien.gateway';
-import { PrismaReferenciasBienGateway } from '../../infraestructura/bienes/prisma-referencias-bien.gateway';
+import { BienRepository } from '../../aplicacion/bienes/ports/bien.repository';
+import { ReferenciasBienRepository } from '../../aplicacion/bienes/ports/referencias-bien.repository';
+import { CrearBienInputBoundary } from '../../aplicacion/bienes/use-cases/crear-bien/crear-bien.input-boundary';
+import { ListarBienesInputBoundary } from '../../aplicacion/bienes/use-cases/listar-bienes/listar-bienes.input-boundary';
+import { ObtenerDetalleBienInputBoundary } from '../../aplicacion/bienes/use-cases/obtener-detalle-bien/obtener-detalle-bien.input-boundary';
+import { CrearBienUseCase } from '../../aplicacion/bienes/use-cases/crear-bien/crear-bien.use-case';
+import { ListarBienesUseCase } from '../../aplicacion/bienes/use-cases/listar-bienes/listar-bienes.use-case';
+import { ObtenerDetalleBienUseCase } from '../../aplicacion/bienes/use-cases/obtener-detalle-bien/obtener-detalle-bien.use-case';
+import { PrismaBienRepository } from '../../infraestructura/bienes/prisma-bien.repository';
+import { PrismaReferenciasBienRepository } from '../../infraestructura/bienes/prisma-referencias-bien.repository';
 import { BienesController } from './bienes.controller';
 
 @Module({
   controllers: [BienesController],
   providers: [
     {
-      provide: BienGateway,
-      useClass: PrismaBienGateway,
+      provide: BienRepository,
+      useClass: PrismaBienRepository,
     },
     {
-      provide: ReferenciasBienGateway,
-      useClass: PrismaReferenciasBienGateway,
+      provide: ReferenciasBienRepository,
+      useClass: PrismaReferenciasBienRepository,
     },
     {
       provide: CrearBienInputBoundary,
-      useFactory: (bienes: BienGateway, referencias: ReferenciasBienGateway) =>
-        new CrearBienUseCase(bienes, referencias),
-      inject: [BienGateway, ReferenciasBienGateway],
+      useFactory: (
+        bienes: BienRepository,
+        referencias: ReferenciasBienRepository,
+      ) => new CrearBienUseCase(bienes, referencias),
+      inject: [BienRepository, ReferenciasBienRepository],
     },
     {
       provide: ListarBienesInputBoundary,
-      useFactory: (repositorio: BienGateway) =>
+      useFactory: (repositorio: BienRepository) =>
         new ListarBienesUseCase(repositorio),
-      inject: [BienGateway],
+      inject: [BienRepository],
     },
     {
       provide: ObtenerDetalleBienInputBoundary,
-      useFactory: (repositorio: BienGateway) =>
+      useFactory: (repositorio: BienRepository) =>
         new ObtenerDetalleBienUseCase(repositorio),
-      inject: [BienGateway],
+      inject: [BienRepository],
     },
   ],
 })
