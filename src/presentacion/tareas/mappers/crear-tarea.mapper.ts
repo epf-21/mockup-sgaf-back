@@ -1,4 +1,4 @@
-import type { CrearTareaInput } from '../../../aplicacion/tareas/use-cases/crear-tarea/crear-tarea.input';
+import type { CrearTareaInput } from '../../../aplicacion/tareas/input/crear-tarea.input';
 import type { CrearTareaBody } from '../dto/crear-tarea.body';
 
 export class CrearTareaMapper {

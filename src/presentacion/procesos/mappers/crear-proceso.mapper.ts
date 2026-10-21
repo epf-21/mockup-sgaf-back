@@ -1,4 +1,4 @@
-import type { CrearProcesoInput } from '../../../aplicacion/procesos/use-cases/crear-proceso/crear-proceso.input';
+import type { CrearProcesoInput } from '../../../aplicacion/procesos/input/crear-proceso.input';
 import type { CrearProcesoBody } from '../dto/crear-proceso.body';
 
 export class CrearProcesoMapper {

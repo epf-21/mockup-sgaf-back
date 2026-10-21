@@ -6,7 +6,7 @@ import {
   ParseUUIDPipe,
   Patch,
 } from '@nestjs/common';
-import { CompletarMovimientoInputBoundary } from '../../aplicacion/procesos/use-cases/completar-movimiento/completar-movimiento.input-boundary';
+import { CompletarMovimientoInputBoundary } from '../../aplicacion/procesos/input-boundary/completar-movimiento.input-boundary';
 import { AccionProcesoBody } from './dto/accion-proceso.body';
 
 @Controller('movimientos')

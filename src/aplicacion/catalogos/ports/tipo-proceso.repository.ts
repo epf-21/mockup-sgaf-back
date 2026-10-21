@@ -1,4 +1,4 @@
-import type { TipoProcesoCatalogoOutput } from '../use-cases/listar-tipos-proceso/listar-tipos-proceso.output';
+import type { TipoProcesoCatalogoOutput } from '../output/listar-tipos-proceso.output';
 
 export abstract class TipoProcesoCatalogoRepository {
   abstract listar(

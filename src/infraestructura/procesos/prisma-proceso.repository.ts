@@ -18,14 +18,14 @@ import {
   calcularOffset,
   crearPaginaOutput,
 } from '../../aplicacion/comun/paginacion/paginacion';
-import type { CrearProcesoOutput } from '../../aplicacion/procesos/use-cases/crear-proceso/crear-proceso.output';
-import type { ListarProcesosOutput } from '../../aplicacion/procesos/use-cases/listar-procesos/listar-procesos.output';
+import type { CrearProcesoOutput } from '../../aplicacion/procesos/output/crear-proceso.output';
+import type { ListarProcesosOutput } from '../../aplicacion/procesos/output/listar-procesos.output';
 import type {
   ObtenerProcesoOutput,
   ProcesoEtapaDetalleOutput,
   ProcesoMovimientoDetalleOutput,
   ProcesoUsuarioDetalleOutput,
-} from '../../aplicacion/procesos/use-cases/obtener-proceso/obtener-proceso.output';
+} from '../../aplicacion/procesos/output/obtener-proceso.output';
 
 @Injectable()
 export class PrismaProcesoRepository implements ProcesoRepository {

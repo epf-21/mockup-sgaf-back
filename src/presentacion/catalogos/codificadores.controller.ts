@@ -1,6 +1,6 @@
 import { Controller, Get, Inject } from '@nestjs/common';
-import { ListarCodificadoresResumenInputBoundary } from '../../aplicacion/catalogos/use-cases/listar-codificadores-resumen/listar-codificadores-resumen.input-boundary';
-import { ListarCodificadoresDetalleInputBoundary } from '../../aplicacion/catalogos/use-cases/listar-codificadores-detalle/listar-codificadores-detalle.input-boundary';
+import { ListarCodificadoresResumenInputBoundary } from '../../aplicacion/catalogos/input-boundary/listar-codificadores-resumen.input-boundary';
+import { ListarCodificadoresDetalleInputBoundary } from '../../aplicacion/catalogos/input-boundary/listar-codificadores-detalle.input-boundary';
 
 @Controller('codificadores')
 export class CodificadoresController {

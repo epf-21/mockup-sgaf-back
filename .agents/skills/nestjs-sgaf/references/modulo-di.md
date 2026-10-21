@@ -8,8 +8,8 @@ El módulo Nest es el composition root del proyecto. Aquí se decide qué implem
 import { Module } from '@nestjs/common';
 import { BienRepository } from '../../aplicacion/bienes/ports/bien.repository';
 import { ReferenciasBienRepository } from '../../aplicacion/bienes/ports/referencias-bien.repository';
-import { CrearBienInputBoundary } from '../../aplicacion/bienes/use-cases/crear-bien/crear-bien.input-boundary';
-import { CrearBienUseCase } from '../../aplicacion/bienes/use-cases/crear-bien/crear-bien.use-case';
+import { CrearBienInputBoundary } from '../../aplicacion/bienes/input-boundary/crear-bien.input-boundary';
+import { CrearBienUseCase } from '../../aplicacion/bienes/use-case/crear-bien.use-case';
 import { PrismaBienRepository } from '../../infraestructura/bienes/prisma-bien.repository';
 import { PrismaReferenciasBienRepository } from '../../infraestructura/bienes/prisma-referencias-bien.repository';
 import { BienesController } from './bienes.controller';
@@ -89,7 +89,7 @@ Prefiere tokens de clase abstracta para ports y boundaries y evita strings mági
 El token es la clase abstracta de aplicación.
 
 ```ts
-import type { ObtenerDetalleBienOutput } from '../../aplicacion/bienes/use-cases/obtener-detalle-bien/obtener-detalle-bien.output';
+import type { ObtenerDetalleBienOutput } from '../../aplicacion/bienes/output/obtener-detalle-bien.output';
 
 export abstract class BienRepository {
   abstract obtenerDetalle(id: string): Promise<ObtenerDetalleBienOutput | null>;

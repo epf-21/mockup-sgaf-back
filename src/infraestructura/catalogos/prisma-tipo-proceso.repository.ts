@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../base-datos/prisma.service';
 import type { TipoProcesoCatalogoRepository } from '../../aplicacion/catalogos/ports/tipo-proceso.repository';
-import type { TipoProcesoCatalogoOutput } from '../../aplicacion/catalogos/use-cases/listar-tipos-proceso/listar-tipos-proceso.output';
+import type { TipoProcesoCatalogoOutput } from '../../aplicacion/catalogos/output/listar-tipos-proceso.output';
 
 const SELECT = {
   id: true,

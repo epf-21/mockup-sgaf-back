@@ -82,12 +82,10 @@ src/
   aplicacion/             Casos de uso, boundaries, outputs y ports. Sin NestJS ni Prisma.
     <modulo>/
       tipos/              Tipos de entrada, persistencia y contratos de aplicación
-      use-cases/
-        <accion>/
-          <accion>.input.ts
-          <accion>.input-boundary.ts
-          <accion>.output.ts
-          <accion>.use-case.ts
+      input/              Datos de entrada por operación
+      input-boundary/     Contratos de entrada por operación
+      output/             Salidas por operación
+      use-case/           Implementaciones de casos de uso
       ports/
         <modulo>.repository.ts
     comun/
@@ -123,10 +121,11 @@ src/
 | Regla o invariante de negocio | Dominio | `dominio/<modulo>/entidades/*.entity.ts` |
 | Error de negocio | Dominio | `dominio/<modulo>/errores/*.error.ts` |
 | Contrato de persistencia | Aplicación | `aplicacion/<modulo>/ports/*.repository.ts` |
-| Salida de un caso de uso | Aplicación | `aplicacion/<modulo>/use-cases/<accion>/*.output.ts` |
+| Salida de un caso de uso | Aplicación | `aplicacion/<modulo>/output/*.output.ts` |
 | Otro contrato de salida | Aplicación | `aplicacion/<modulo>/ports/*.port.ts` |
-| Operación de aplicación | Aplicación | `aplicacion/<modulo>/use-cases/<accion>/*.use-case.ts` |
-| Contrato de entrada | Aplicación | `aplicacion/<modulo>/use-cases/<accion>/*.input-boundary.ts` |
+| Operación de aplicación | Aplicación | `aplicacion/<modulo>/use-case/*.use-case.ts` |
+| Datos de entrada | Aplicación | `aplicacion/<modulo>/input/*.input.ts` |
+| Contrato de entrada | Aplicación | `aplicacion/<modulo>/input-boundary/*.input-boundary.ts` |
 | Consulta o escritura Prisma | Infraestructura | `infraestructura/<modulo>/prisma-*.repository.ts` |
 | Validación HTTP | Presentación | `presentacion/<modulo>/dto/*.body.ts` / `*.query.ts` |
 | Traducción DTO <-> input | Presentación | `presentacion/<modulo>/mappers/*.mapper.ts` |
@@ -174,7 +173,7 @@ Lee solo la referencia que necesites para la tarea; no cargues las seis si el ca
 - [ ] El caso de uso no importa NestJS ni Prisma.
 - [ ] El controller solo valida, mapea y delega.
 - [ ] El port está declarado en `aplicacion/<modulo>/ports/` como clase abstracta.
-- [ ] Las salidas del caso de uso están en `aplicacion/<modulo>/use-cases/<accion>/*.output.ts`.
+- [ ] Las salidas del caso de uso están en `aplicacion/<modulo>/output/*.output.ts`.
 - [ ] La paginación reutiliza `Paginacion` y los helpers de `aplicacion/comun/paginacion/`.
 - [ ] El adaptador Prisma implementa el port desde infraestructura.
 - [ ] El provider usa `useFactory` + `inject` cuando corresponde.

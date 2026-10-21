@@ -35,10 +35,10 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { CerrarTareaInputBoundary } from '../../aplicacion/tareas/use-cases/cerrar-tarea/cerrar-tarea.input-boundary';
-import { CrearTareaInputBoundary } from '../../aplicacion/tareas/use-cases/crear-tarea/crear-tarea.input-boundary';
-import { ListarTareasInputBoundary } from '../../aplicacion/tareas/use-cases/listar-tareas/listar-tareas.input-boundary';
-import { ObtenerTareaInputBoundary } from '../../aplicacion/tareas/use-cases/obtener-tarea/obtener-tarea.input-boundary';
+import { CerrarTareaInputBoundary } from '../../aplicacion/tareas/input-boundary/cerrar-tarea.input-boundary';
+import { CrearTareaInputBoundary } from '../../aplicacion/tareas/input-boundary/crear-tarea.input-boundary';
+import { ListarTareasInputBoundary } from '../../aplicacion/tareas/input-boundary/listar-tareas.input-boundary';
+import { ObtenerTareaInputBoundary } from '../../aplicacion/tareas/input-boundary/obtener-tarea.input-boundary';
 import { CerrarTareaBody } from './dto/cerrar-tarea.body';
 import { CrearTareaBody } from './dto/crear-tarea.body';
 import { ListarTareasQuery } from './dto/listar-tareas.query';
@@ -257,7 +257,7 @@ Notas:
 
 ```ts
 import type { CrearBienBody } from '../dto/crear-bien.body';
-import type { CrearBienInput } from '../../../aplicacion/bienes/use-cases/crear-bien/crear-bien.input';
+import type { CrearBienInput } from '../../../aplicacion/bienes/input/crear-bien.input';
 
 export class CrearBienMapper {
   static bodyToInput(body: CrearBienBody): CrearBienInput {

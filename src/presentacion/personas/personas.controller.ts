@@ -1,6 +1,6 @@
 import { Controller, Get, Inject } from '@nestjs/common';
-import { ListarPersonasInputBoundary } from '../../aplicacion/personas/use-cases/listar-personas/listar-personas.input-boundary';
-import { ListarUsuariosInputBoundary } from '../../aplicacion/personas/use-cases/listar-usuarios/listar-usuarios.input-boundary';
+import { ListarPersonasInputBoundary } from '../../aplicacion/personas/input-boundary/listar-personas.input-boundary';
+import { ListarUsuariosInputBoundary } from '../../aplicacion/personas/input-boundary/listar-usuarios.input-boundary';
 
 @Controller()
 export class PersonasController {

@@ -19,7 +19,7 @@ presentación adapta HTTP.
 - **Port**: contrato de salida que declara una capacidad que el caso de uso necesita
   (persistencia, reloj, referencias, etc.). Vive en `aplicacion/<modulo>/ports/`.
 - **Output**: contrato de salida de un caso de uso. Vive en
-  `aplicacion/<modulo>/use-cases/<accion>/<accion>.output.ts`.
+  `aplicacion/<modulo>/output/<accion>.output.ts`.
 - **Repository**: port de persistencia. Se declara en un archivo `*.repository.ts` y
   se implementa en infraestructura con un adaptador Prisma (`Prisma<Modulo>Repository`).
 - **Adapter**: implementación concreta de un port. En este proyecto, los adaptadores
@@ -112,22 +112,23 @@ src/
       tipos/bien.ts
       ports/bien.repository.ts
       ports/referencias-bien.repository.ts
-      use-cases/
-        listar-bienes/
-          listar-bienes.use-case.ts
-          listar-bienes.input-boundary.ts
-          listar-bienes.input.ts
-          listar-bienes.output.ts
-        crear-bien/
-          crear-bien.use-case.ts
-          crear-bien.input-boundary.ts
-          crear-bien.input.ts
-          crear-bien.output.ts
-    catalogos/use-cases/
-    personas/use-cases/
-    procesos/use-cases/
-    tareas/use-cases/
-    unidades/use-cases/
+      input/
+        crear-bien.input.ts
+        listar-bienes.input.ts
+      input-boundary/
+        crear-bien.input-boundary.ts
+        listar-bienes.input-boundary.ts
+      output/
+        crear-bien.output.ts
+        listar-bienes.output.ts
+      use-case/
+        crear-bien.use-case.ts
+        listar-bienes.use-case.ts
+    catalogos/
+    personas/
+    procesos/
+    tareas/
+    unidades/
     comun/ports/reloj.port.ts
 
   presentacion/                 # Adaptadores de entrada (HTTP)
@@ -204,9 +205,9 @@ caso de uso.
 // src/aplicacion/bienes/ports/bien.repository.ts
 import type { NuevoBien } from '../tipos/bien';
 import type { Paginacion } from '../../comun/paginacion/paginacion';
-import type { CrearBienOutput } from '../use-cases/crear-bien/crear-bien.output';
-import type { ListarBienesOutput } from '../use-cases/listar-bienes/listar-bienes.output';
-import type { ObtenerDetalleBienOutput } from '../use-cases/obtener-detalle-bien/obtener-detalle-bien.output';
+import type { CrearBienOutput } from '../output/crear-bien.output';
+import type { ListarBienesOutput } from '../output/listar-bienes.output';
+import type { ObtenerDetalleBienOutput } from '../output/obtener-detalle-bien.output';
 
 export abstract class BienRepository {
   abstract listarPaginado(paginacion: Paginacion): Promise<ListarBienesOutput>;
@@ -236,8 +237,8 @@ contrato de salida de la aplicación: define el tipo del método principal y de 
 métodos internos que devuelven datos. El dominio ya no contiene modelos de lectura.
 
 ```ts
-// src/aplicacion/bienes/use-cases/listar-bienes/listar-bienes.output.ts
-import type { PaginaOutput } from '../../../comun/paginacion/paginacion.output';
+// src/aplicacion/bienes/output/listar-bienes.output.ts
+import type { PaginaOutput } from '../../comun/paginacion/paginacion.output';
 
 export interface BienResumenOutput {
   id: string;
@@ -254,9 +255,9 @@ export type ListarBienesOutput = PaginaOutput<BienResumenOutput>;
 ```
 
 ```ts
-// src/aplicacion/bienes/use-cases/listar-bienes/listar-bienes.input-boundary.ts
-import type { Paginacion } from '../../../comun/paginacion/paginacion';
-import type { ListarBienesOutput } from './listar-bienes.output';
+// src/aplicacion/bienes/input-boundary/listar-bienes.input-boundary.ts
+import type { Paginacion } from '../../comun/paginacion/paginacion';
+import type { ListarBienesOutput } from '../output/listar-bienes.output';
 
 export abstract class ListarBienesInputBoundary {
   abstract execute(paginacion: Paginacion): Promise<ListarBienesOutput>;
@@ -264,11 +265,11 @@ export abstract class ListarBienesInputBoundary {
 ```
 
 ```ts
-// src/aplicacion/bienes/use-cases/listar-bienes/listar-bienes.use-case.ts
-import type { Paginacion } from '../../../comun/paginacion/paginacion';
-import type { BienRepository } from '../../ports/bien.repository';
-import type { ListarBienesInputBoundary } from './listar-bienes.input-boundary';
-import type { ListarBienesOutput } from './listar-bienes.output';
+// src/aplicacion/bienes/use-case/listar-bienes.use-case.ts
+import type { Paginacion } from '../../comun/paginacion/paginacion';
+import type { BienRepository } from '../ports/bien.repository';
+import type { ListarBienesInputBoundary } from '../input-boundary/listar-bienes.input-boundary';
+import type { ListarBienesOutput } from '../output/listar-bienes.output';
 
 export class ListarBienesUseCase implements ListarBienesInputBoundary {
   constructor(private readonly bienes: BienRepository) {}
@@ -296,7 +297,7 @@ import {
   type Paginacion,
 } from '../../aplicacion/comun/paginacion/paginacion';
 import type { BienRepository } from '../../aplicacion/bienes/ports/bien.repository';
-import type { ListarBienesOutput } from '../../aplicacion/bienes/use-cases/listar-bienes/listar-bienes.output';
+import type { ListarBienesOutput } from '../../aplicacion/bienes/output/listar-bienes.output';
 
 @Injectable()
 export class PrismaBienRepository implements BienRepository {
@@ -369,8 +370,8 @@ de uso a través de sus **input boundaries**.
 ```ts
 // src/presentacion/bienes/bienes.module.ts
 import { BienRepository } from '../../aplicacion/bienes/ports/bien.repository';
-import { ListarBienesInputBoundary } from '../../aplicacion/bienes/use-cases/listar-bienes/listar-bienes.input-boundary';
-import { ListarBienesUseCase } from '../../aplicacion/bienes/use-cases/listar-bienes/listar-bienes.use-case';
+import { ListarBienesInputBoundary } from '../../aplicacion/bienes/input-boundary/listar-bienes.input-boundary';
+import { ListarBienesUseCase } from '../../aplicacion/bienes/use-case/listar-bienes.use-case';
 import { PrismaBienRepository } from '../../infraestructura/bienes/prisma-bien.repository';
 
 @Module({
@@ -478,10 +479,10 @@ Todos los módulos siguen el patrón anterior. Algunos casos:
 4. `aplicacion/<modulo>/tipos/` — tipos de entrada y persistencia que no usa el dominio.
 5. `aplicacion/<modulo>/ports/` — define los ports (clases abstractas) y los
    `*.repository.ts` de persistencia.
-6. `aplicacion/<modulo>/use-cases/<caso-de-uso>/` — input, input boundary, output y
-   caso de uso por operación.
-7. `aplicacion/<modulo>/use-cases/<caso-de-uso>/*.output.ts` — define las salidas
-   del método principal y de los métodos internos.
+6. `aplicacion/<modulo>/input/`, `input-boundary/`, `output/` y `use-case/` — separa
+   los archivos de cada operación por tipo.
+7. `aplicacion/<modulo>/output/<accion>.output.ts` — define las salidas del método
+   principal y de los métodos internos.
 8. `infraestructura/<modulo>/` — implementación Prisma de cada repository
    (`prisma-<modulo>.repository.ts`).
 9. `presentacion/<modulo>/` — DTOs, mappers, controller y `.module.ts`.

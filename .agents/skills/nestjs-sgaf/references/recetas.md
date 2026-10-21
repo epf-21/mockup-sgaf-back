@@ -6,14 +6,14 @@ Recetas concretas para las tareas más frecuentes. Antes de empezar, lee el mód
 
 **Ejemplo:** listar elementos paginados.
 
-1. Define la salida en `aplicacion/<modulo>/use-cases/listar-<x>/listar-<x>.output.ts`.
+1. Define la salida en `aplicacion/<modulo>/output/listar-<x>.output.ts`.
 2. Agrega el método al port en `aplicacion/<modulo>/ports/`.
 3. Crea el input si hay filtros:
-   `aplicacion/<modulo>/use-cases/listar-<x>/listar-<x>.input.ts`
+   `aplicacion/<modulo>/input/listar-<x>.input.ts`
 4. Crea el boundary:
-   `aplicacion/<modulo>/use-cases/listar-<x>/listar-<x>.input-boundary.ts`
+   `aplicacion/<modulo>/input-boundary/listar-<x>.input-boundary.ts`
 5. Crea el caso de uso:
-   `aplicacion/<modulo>/use-cases/listar-<x>/listar-<x>.use-case.ts`
+   `aplicacion/<modulo>/use-case/listar-<x>.use-case.ts`
 6. Implementa el método en `infraestructura/<modulo>/prisma-<modulo>.repository.ts`.
 7. Registra el boundary con `useFactory` en el módulo.
 8. Crea `presentacion/<modulo>/dto/listar-<x>.query.ts`.
@@ -24,8 +24,8 @@ Recetas concretas para las tareas más frecuentes. Antes de empezar, lee el mód
 Boundary:
 
 ```ts
-import type { ListarElementosInput } from './listar-elementos.input';
-import type { ListarElementosOutput } from './listar-elementos.output';
+import type { ListarElementosInput } from '../input/listar-elementos.input';
+import type { ListarElementosOutput } from '../output/listar-elementos.output';
 
 export abstract class ListarElementosInputBoundary {
   abstract execute(input: ListarElementosInput): Promise<ListarElementosOutput>;
@@ -35,7 +35,7 @@ export abstract class ListarElementosInputBoundary {
 Caso de uso:
 
 ```ts
-import type { ListarElementosOutput } from './listar-elementos.output';
+import type { ListarElementosOutput } from '../output/listar-elementos.output';
 
 export class ListarElementosUseCase implements ListarElementosInputBoundary {
   constructor(private readonly elementos: ElementoRepository) {}
@@ -50,8 +50,8 @@ export class ListarElementosUseCase implements ListarElementosInputBoundary {
 
 **Ejemplo:** crear un elemento.
 
-1. Define el input en `aplicacion/<modulo>/use-cases/crear-<x>/crear-<x>.input.ts`.
-2. Define la salida en `aplicacion/<modulo>/use-cases/crear-<x>/crear-<x>.output.ts`.
+1. Define el input en `aplicacion/<modulo>/input/crear-<x>.input.ts`.
+2. Define la salida en `aplicacion/<modulo>/output/crear-<x>.output.ts`.
 3. Crea el boundary con `execute(input): Promise<...>`.
 4. Crea el caso de uso. Debe:
    - validar referencias con un port de referencias;
@@ -152,15 +152,18 @@ src/dominio/elementos/
 
 src/aplicacion/elementos/
   ports/elemento.repository.ts
-  use-cases/
-    crear-elemento/crear-elemento.input.ts
-    crear-elemento/crear-elemento.input-boundary.ts
-    crear-elemento/crear-elemento.output.ts
-    crear-elemento/crear-elemento.use-case.ts
-    listar-elementos/listar-elementos.input.ts
-    listar-elementos/listar-elementos.input-boundary.ts
-    listar-elementos/listar-elementos.output.ts
-    listar-elementos/listar-elementos.use-case.ts
+  input/
+    crear-elemento.input.ts
+    listar-elementos.input.ts
+  input-boundary/
+    crear-elemento.input-boundary.ts
+    listar-elementos.input-boundary.ts
+  output/
+    crear-elemento.output.ts
+    listar-elementos.output.ts
+  use-case/
+    crear-elemento.use-case.ts
+    listar-elementos.use-case.ts
 
 src/infraestructura/elementos/
   prisma-elemento.repository.ts
@@ -402,7 +405,7 @@ Buenas prácticas:
 
 - [ ] La regla está en la capa correcta.
 - [ ] El caso de uso no conoce NestJS/Prisma.
-- [ ] Las salidas están en `aplicacion/<modulo>/use-cases/<accion>/*.output.ts`.
+- [ ] Las salidas están en `aplicacion/<modulo>/output/*.output.ts`.
 - [ ] El controller solo adapta HTTP.
 - [ ] El port tiene contrato abstracto e implementación Prisma.
 - [ ] El provider está registrado con `useFactory` + `inject`.

@@ -12,9 +12,9 @@ import {
   calcularOffset,
   crearPaginaOutput,
 } from '../../aplicacion/comun/paginacion/paginacion';
-import type { CrearBienOutput } from '../../aplicacion/bienes/use-cases/crear-bien/crear-bien.output';
-import type { ListarBienesOutput } from '../../aplicacion/bienes/use-cases/listar-bienes/listar-bienes.output';
-import type { ObtenerDetalleBienOutput } from '../../aplicacion/bienes/use-cases/obtener-detalle-bien/obtener-detalle-bien.output';
+import type { CrearBienOutput } from '../../aplicacion/bienes/output/crear-bien.output';
+import type { ListarBienesOutput } from '../../aplicacion/bienes/output/listar-bienes.output';
+import type { ObtenerDetalleBienOutput } from '../../aplicacion/bienes/output/obtener-detalle-bien.output';
 
 const ESTADO_BIEN_LABEL: Record<string, string> = {
   en_registro: 'En registro',

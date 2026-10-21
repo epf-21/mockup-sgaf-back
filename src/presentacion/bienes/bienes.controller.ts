@@ -8,9 +8,9 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { CrearBienInputBoundary } from '../../aplicacion/bienes/use-cases/crear-bien/crear-bien.input-boundary';
-import { ListarBienesInputBoundary } from '../../aplicacion/bienes/use-cases/listar-bienes/listar-bienes.input-boundary';
-import { ObtenerDetalleBienInputBoundary } from '../../aplicacion/bienes/use-cases/obtener-detalle-bien/obtener-detalle-bien.input-boundary';
+import { CrearBienInputBoundary } from '../../aplicacion/bienes/input-boundary/crear-bien.input-boundary';
+import { ListarBienesInputBoundary } from '../../aplicacion/bienes/input-boundary/listar-bienes.input-boundary';
+import { ObtenerDetalleBienInputBoundary } from '../../aplicacion/bienes/input-boundary/obtener-detalle-bien.input-boundary';
 import { CrearBienBody } from './dto/crear-bien.body';
 import { ListarBienesQuery } from './dto/listar-bienes.query';
 import { CrearBienMapper } from './mappers/crear-bien.mapper';

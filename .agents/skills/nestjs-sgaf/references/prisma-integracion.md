@@ -32,7 +32,7 @@ Reglas:
 Contrato:
 
 ```ts
-import type { ObtenerElementoOutput } from '../../aplicacion/elementos/use-cases/obtener-elemento/obtener-elemento.output';
+import type { ObtenerElementoOutput } from '../../aplicacion/elementos/output/obtener-elemento.output';
 
 export abstract class ElementoRepository {
   abstract obtenerDetalle(id: string): Promise<ObtenerElementoOutput | null>;

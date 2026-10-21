@@ -1,0 +1,11 @@
+import type { TipoProcesoCatalogoRepository } from '../ports/tipo-proceso.repository';
+import type { ObtenerTipoProcesoOutput } from '../output/obtener-tipo-proceso.output';
+import type { ObtenerTipoProcesoInputBoundary } from '../input-boundary/obtener-tipo-proceso.input-boundary';
+
+export class ObtenerTipoProcesoUseCase implements ObtenerTipoProcesoInputBoundary {
+  constructor(private readonly tipos: TipoProcesoCatalogoRepository) {}
+
+  execute(id: string): Promise<ObtenerTipoProcesoOutput> {
+    return this.tipos.obtener(id);
+  }
+}

@@ -8,9 +8,9 @@ import {
   calcularOffset,
   crearPaginaOutput,
 } from '../../aplicacion/comun/paginacion/paginacion';
-import type { CrearTareaOutput } from '../../aplicacion/tareas/use-cases/crear-tarea/crear-tarea.output';
-import type { ListarTareasOutput } from '../../aplicacion/tareas/use-cases/listar-tareas/listar-tareas.output';
-import type { ObtenerTareaOutput } from '../../aplicacion/tareas/use-cases/obtener-tarea/obtener-tarea.output';
+import type { CrearTareaOutput } from '../../aplicacion/tareas/output/crear-tarea.output';
+import type { ListarTareasOutput } from '../../aplicacion/tareas/output/listar-tareas.output';
+import type { ObtenerTareaOutput } from '../../aplicacion/tareas/output/obtener-tarea.output';
 
 @Injectable()
 export class PrismaTareaRepository implements TareaRepository {

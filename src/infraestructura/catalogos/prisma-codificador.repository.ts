@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../base-datos/prisma.service';
 import type { CodificadorRepository } from '../../aplicacion/catalogos/ports/codificador.repository';
-import type { CodificadorDetalleOutput } from '../../aplicacion/catalogos/use-cases/listar-codificadores-detalle/listar-codificadores-detalle.output';
-import type { CodificadorResumenOutput } from '../../aplicacion/catalogos/use-cases/listar-codificadores-resumen/listar-codificadores-resumen.output';
+import type { CodificadorDetalleOutput } from '../../aplicacion/catalogos/output/listar-codificadores-detalle.output';
+import type { CodificadorResumenOutput } from '../../aplicacion/catalogos/output/listar-codificadores-resumen.output';
 
 @Injectable()
 export class PrismaCodificadorRepository implements CodificadorRepository {

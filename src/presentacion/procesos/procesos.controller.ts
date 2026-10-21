@@ -9,10 +9,10 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { CrearProcesoInputBoundary } from '../../aplicacion/procesos/use-cases/crear-proceso/crear-proceso.input-boundary';
-import { ListarProcesosInputBoundary } from '../../aplicacion/procesos/use-cases/listar-procesos/listar-procesos.input-boundary';
-import { ObtenerProcesoInputBoundary } from '../../aplicacion/procesos/use-cases/obtener-proceso/obtener-proceso.input-boundary';
-import { TransicionarProcesoInputBoundary } from '../../aplicacion/procesos/use-cases/transicionar-proceso/transicionar-proceso.input-boundary';
+import { CrearProcesoInputBoundary } from '../../aplicacion/procesos/input-boundary/crear-proceso.input-boundary';
+import { ListarProcesosInputBoundary } from '../../aplicacion/procesos/input-boundary/listar-procesos.input-boundary';
+import { ObtenerProcesoInputBoundary } from '../../aplicacion/procesos/input-boundary/obtener-proceso.input-boundary';
+import { TransicionarProcesoInputBoundary } from '../../aplicacion/procesos/input-boundary/transicionar-proceso.input-boundary';
 import { AccionProceso } from '../../aplicacion/procesos/tipos/proceso';
 import { AccionProcesoBody } from './dto/accion-proceso.body';
 import { CrearProcesoBody } from './dto/crear-proceso.body';

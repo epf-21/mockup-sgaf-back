@@ -6,8 +6,8 @@ import {
   ParseUUIDPipe,
   Query,
 } from '@nestjs/common';
-import { ListarTiposProcesoInputBoundary } from '../../aplicacion/catalogos/use-cases/listar-tipos-proceso/listar-tipos-proceso.input-boundary';
-import { ObtenerTipoProcesoInputBoundary } from '../../aplicacion/catalogos/use-cases/obtener-tipo-proceso/obtener-tipo-proceso.input-boundary';
+import { ListarTiposProcesoInputBoundary } from '../../aplicacion/catalogos/input-boundary/listar-tipos-proceso.input-boundary';
+import { ObtenerTipoProcesoInputBoundary } from '../../aplicacion/catalogos/input-boundary/obtener-tipo-proceso.input-boundary';
 import { ListarTiposProcesoQuery } from './dto/listar-tipos-proceso.query';
 
 @Controller('tipos-proceso')

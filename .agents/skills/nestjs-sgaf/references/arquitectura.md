@@ -105,9 +105,9 @@ Un `Port` es una clase abstracta en la capa de aplicación que describe una capa
 ```ts
 import type { NuevoBien } from '../tipos/bien';
 import type { Paginacion } from '../../comun/paginacion/paginacion';
-import type { CrearBienOutput } from '../use-cases/crear-bien/crear-bien.output';
-import type { ListarBienesOutput } from '../use-cases/listar-bienes/listar-bienes.output';
-import type { ObtenerDetalleBienOutput } from '../use-cases/obtener-detalle-bien/obtener-detalle-bien.output';
+import type { CrearBienOutput } from '../output/crear-bien.output';
+import type { ListarBienesOutput } from '../output/listar-bienes.output';
+import type { ObtenerDetalleBienOutput } from '../output/obtener-detalle-bien.output';
 
 export abstract class BienRepository {
   abstract listarPaginado(paginacion: Paginacion): Promise<ListarBienesOutput>;
@@ -158,13 +158,14 @@ export enum AccionProceso {
 La paginación es compartida: `Paginacion`, la normalización, el offset y los metadatos
 viven en `aplicacion/comun/paginacion/`. No dupliques esos cálculos por módulo.
 
-Cada operación tiene cuatro archivos en `aplicacion/<modulo>/use-cases/<accion>/`:
+Cada operación distribuye sus cuatro archivos por tipo dentro de
+`aplicacion/<modulo>/`:
 
 ```text
-cerrar-tarea.input.ts
-cerrar-tarea.input-boundary.ts
-cerrar-tarea.output.ts
-cerrar-tarea.use-case.ts
+input/cerrar-tarea.input.ts
+input-boundary/cerrar-tarea.input-boundary.ts
+output/cerrar-tarea.output.ts
+use-case/cerrar-tarea.use-case.ts
 ```
 
 ### Input
@@ -220,8 +221,8 @@ export interface CerrarTareaOutput {
 Contrato abstracto que implementa el caso de uso y consume el controller.
 
 ```ts
-import type { CerrarTareaInput } from './cerrar-tarea.input';
-import type { CerrarTareaOutput } from './cerrar-tarea.output';
+import type { CerrarTareaInput } from '../input/cerrar-tarea.input';
+import type { CerrarTareaOutput } from '../output/cerrar-tarea.output';
 
 export abstract class CerrarTareaInputBoundary {
   abstract execute(input: CerrarTareaInput): Promise<CerrarTareaOutput>;
@@ -233,7 +234,7 @@ export abstract class CerrarTareaInputBoundary {
 Clase plana que implementa el boundary y recibe ports por constructor.
 
 ```ts
-import type { CerrarTareaOutput } from './cerrar-tarea.output';
+import type { CerrarTareaOutput } from '../output/cerrar-tarea.output';
 
 export class CerrarTareaUseCase implements CerrarTareaInputBoundary {
   constructor(
@@ -260,7 +261,7 @@ export class CerrarTareaUseCase implements CerrarTareaInputBoundary {
 }
 ```
 
-El ejemplo omite la validación de usuario y rol para mantenerlo corto; la versión completa está en `src/aplicacion/tareas/use-cases/cerrar-tarea/cerrar-tarea.use-case.ts`.
+El ejemplo omite la validación de usuario y rol para mantenerlo corto; la versión completa está en `src/aplicacion/tareas/use-case/cerrar-tarea.use-case.ts`.
 
 Reglas:
 
@@ -416,7 +417,8 @@ HTTP -> ValidationPipe -> Controller -> Mapper -> InputBoundary
 2. Errores específicos en `dominio/<modulo>/errores/`.
 3. Ports en `aplicacion/<modulo>/ports/`.
 4. Tipos de entrada y persistencia en `aplicacion/<modulo>/tipos/`.
-5. Inputs, outputs, boundaries y use cases en `aplicacion/<modulo>/use-cases/`.
+5. Inputs, outputs, boundaries y use cases en `aplicacion/<modulo>/input/`,
+   `input-boundary/`, `output/` y `use-case/`.
 6. Implementaciones Prisma en `infraestructura/<modulo>/`.
 7. DTOs, mappers, controller y módulo en `presentacion/<modulo>/`.
 8. Registro en `presentacion/<modulo>/<modulo>.module.ts` y en `src/app.module.ts`.
