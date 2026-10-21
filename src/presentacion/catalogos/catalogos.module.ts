@@ -4,10 +4,12 @@ import { TipoProcesoCatalogoRepository } from '../../aplicacion/catalogos/ports/
 import { ListarCodificadoresResumenInputBoundary } from '../../aplicacion/catalogos/input-boundary/listar-codificadores-resumen.input-boundary';
 import { ListarCodificadoresDetalleInputBoundary } from '../../aplicacion/catalogos/input-boundary/listar-codificadores-detalle.input-boundary';
 import { ListarTiposProcesoInputBoundary } from '../../aplicacion/catalogos/input-boundary/listar-tipos-proceso.input-boundary';
+import { ListarTiposProcesoResumenInputBoundary } from '../../aplicacion/catalogos/input-boundary/listar-tipos-proceso-resumen.input-boundary';
 import { ObtenerTipoProcesoInputBoundary } from '../../aplicacion/catalogos/input-boundary/obtener-tipo-proceso.input-boundary';
 import { ListarCodificadoresResumenUseCase } from '../../aplicacion/catalogos/use-case/listar-codificadores-resumen.use-case';
 import { ListarCodificadoresDetalleUseCase } from '../../aplicacion/catalogos/use-case/listar-codificadores-detalle.use-case';
 import { ListarTiposProcesoUseCase } from '../../aplicacion/catalogos/use-case/listar-tipos-proceso.use-case';
+import { ListarTiposProcesoResumenUseCase } from '../../aplicacion/catalogos/use-case/listar-tipos-proceso-resumen.use-case';
 import { ObtenerTipoProcesoUseCase } from '../../aplicacion/catalogos/use-case/obtener-tipo-proceso.use-case';
 import { PrismaCodificadorRepository } from '../../infraestructura/catalogos/prisma-codificador.repository';
 import { PrismaTipoProcesoCatalogoRepository } from '../../infraestructura/catalogos/prisma-tipo-proceso.repository';
@@ -41,6 +43,12 @@ import { TiposProcesoController } from './tipos-proceso.controller';
       provide: ListarTiposProcesoInputBoundary,
       useFactory: (tipos: TipoProcesoCatalogoRepository) =>
         new ListarTiposProcesoUseCase(tipos),
+      inject: [TipoProcesoCatalogoRepository],
+    },
+    {
+      provide: ListarTiposProcesoResumenInputBoundary,
+      useFactory: (tipos: TipoProcesoCatalogoRepository) =>
+        new ListarTiposProcesoResumenUseCase(tipos),
       inject: [TipoProcesoCatalogoRepository],
     },
     {

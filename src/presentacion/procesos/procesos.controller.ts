@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { CrearProcesoInputBoundary } from '../../aplicacion/procesos/input-boundary/crear-proceso.input-boundary';
 import { ListarProcesosInputBoundary } from '../../aplicacion/procesos/input-boundary/listar-procesos.input-boundary';
+import { ListarProcesosResumenInputBoundary } from '../../aplicacion/procesos/input-boundary/listar-procesos-resumen.input-boundary';
 import { ObtenerProcesoInputBoundary } from '../../aplicacion/procesos/input-boundary/obtener-proceso.input-boundary';
 import { TransicionarProcesoInputBoundary } from '../../aplicacion/procesos/input-boundary/transicionar-proceso.input-boundary';
 import { AccionProceso } from '../../aplicacion/procesos/tipos/proceso';
@@ -25,6 +26,8 @@ export class ProcesosController {
   constructor(
     @Inject(ListarProcesosInputBoundary)
     private readonly listarProcesos: ListarProcesosInputBoundary,
+    @Inject(ListarProcesosResumenInputBoundary)
+    private readonly listarResumen: ListarProcesosResumenInputBoundary,
     @Inject(CrearProcesoInputBoundary)
     private readonly crearProceso: CrearProcesoInputBoundary,
     @Inject(ObtenerProcesoInputBoundary)
@@ -38,6 +41,11 @@ export class ProcesosController {
     return this.listarProcesos.execute(
       ListarProcesosMapper.toPaginacion(query),
     );
+  }
+
+  @Get('resumen')
+  getResumen(@Query() query: ListarProcesosQuery) {
+    return this.listarResumen.execute(ListarProcesosMapper.toPaginacion(query));
   }
 
   @Get(':id')

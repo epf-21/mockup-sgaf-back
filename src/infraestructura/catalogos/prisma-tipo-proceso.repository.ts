@@ -2,6 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../base-datos/prisma.service';
 import type { TipoProcesoCatalogoRepository } from '../../aplicacion/catalogos/ports/tipo-proceso.repository';
 import type { TipoProcesoCatalogoOutput } from '../../aplicacion/catalogos/output/listar-tipos-proceso.output';
+import type { TipoProcesoResumenOutput } from '../../aplicacion/catalogos/output/listar-tipos-proceso-resumen.output';
+
+const SELECT_RESUMEN = {
+  id: true,
+  codigo: true,
+  nombre: true,
+  categoria: true,
+} as const;
 
 const SELECT = {
   id: true,
@@ -25,6 +33,18 @@ export class PrismaTipoProcesoCatalogoRepository implements TipoProcesoCatalogoR
     const tipos = await this.prisma.tipo_proceso.findMany({
       where: categoria ? { categoria: categoria as never } : undefined,
       select: SELECT,
+      orderBy: [{ categoria: 'asc' }, { nombre: 'asc' }],
+    });
+
+    return tipos.map((tipo) => ({ ...tipo }));
+  }
+
+  async listarResumen(
+    categoria: string | null,
+  ): Promise<TipoProcesoResumenOutput[]> {
+    const tipos = await this.prisma.tipo_proceso.findMany({
+      where: categoria ? { categoria: categoria as never } : undefined,
+      select: SELECT_RESUMEN,
       orderBy: [{ categoria: 'asc' }, { nombre: 'asc' }],
     });
 

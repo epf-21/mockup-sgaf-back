@@ -4,7 +4,9 @@ import { CrearProcesoUseCase } from '../../aplicacion/procesos/use-case/crear-pr
 import { CompletarMovimientoInputBoundary } from '../../aplicacion/procesos/input-boundary/completar-movimiento.input-boundary';
 import { CompletarMovimientoUseCase } from '../../aplicacion/procesos/use-case/completar-movimiento.use-case';
 import { ListarProcesosInputBoundary } from '../../aplicacion/procesos/input-boundary/listar-procesos.input-boundary';
+import { ListarProcesosResumenInputBoundary } from '../../aplicacion/procesos/input-boundary/listar-procesos-resumen.input-boundary';
 import { ListarProcesosUseCase } from '../../aplicacion/procesos/use-case/listar-procesos.use-case';
+import { ListarProcesosResumenUseCase } from '../../aplicacion/procesos/use-case/listar-procesos-resumen.use-case';
 import { ObtenerProcesoInputBoundary } from '../../aplicacion/procesos/input-boundary/obtener-proceso.input-boundary';
 import { ObtenerProcesoUseCase } from '../../aplicacion/procesos/use-case/obtener-proceso.use-case';
 import { TransicionarProcesoInputBoundary } from '../../aplicacion/procesos/input-boundary/transicionar-proceso.input-boundary';
@@ -45,6 +47,12 @@ import { ProcesosController } from './procesos.controller';
       provide: ListarProcesosInputBoundary,
       useFactory: (procesos: ProcesoRepository) =>
         new ListarProcesosUseCase(procesos),
+      inject: [ProcesoRepository],
+    },
+    {
+      provide: ListarProcesosResumenInputBoundary,
+      useFactory: (procesos: ProcesoRepository) =>
+        new ListarProcesosResumenUseCase(procesos),
       inject: [ProcesoRepository],
     },
     {

@@ -6,6 +6,7 @@ import type { NuevoProceso } from '../tipos/proceso';
 import type { Paginacion } from '../../comun/paginacion/paginacion';
 import type { CrearProcesoOutput } from '../output/crear-proceso.output';
 import type { ListarProcesosOutput } from '../output/listar-procesos.output';
+import type { ListarProcesosResumenOutput } from '../output/listar-procesos-resumen.output';
 import type { ObtenerProcesoOutput } from '../output/obtener-proceso.output';
 
 export abstract class ProcesoRepository {
@@ -13,6 +14,9 @@ export abstract class ProcesoRepository {
   abstract listarPaginado(
     paginacion: Paginacion,
   ): Promise<ListarProcesosOutput>;
+  abstract listarResumen(
+    paginacion: Paginacion,
+  ): Promise<ListarProcesosResumenOutput>;
   abstract obtenerDetalle(id: string): Promise<ObtenerProcesoOutput | null>;
   abstract obtenerWorkflow(id: string): Promise<DatosProcesoWorkflow | null>;
   abstract obtenerWorkflowPorMovimiento(

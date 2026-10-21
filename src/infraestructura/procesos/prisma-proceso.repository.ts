@@ -20,6 +20,7 @@ import {
 } from '../../aplicacion/comun/paginacion/paginacion';
 import type { CrearProcesoOutput } from '../../aplicacion/procesos/output/crear-proceso.output';
 import type { ListarProcesosOutput } from '../../aplicacion/procesos/output/listar-procesos.output';
+import type { ListarProcesosResumenOutput } from '../../aplicacion/procesos/output/listar-procesos-resumen.output';
 import type {
   ObtenerProcesoOutput,
   ProcesoEtapaDetalleOutput,
@@ -131,6 +132,53 @@ export class PrismaProcesoRepository implements ProcesoRepository {
       unidad_destino: proceso.movimientos[0]?.unidad_destino?.nombre ?? null,
       bienes: proceso._count.movimientos,
       estado: proceso.estado,
+    }));
+
+    return crearPaginaOutput(datos, total, paginacion);
+  }
+
+  async listarResumen(
+    paginacion: Paginacion,
+  ): Promise<ListarProcesosResumenOutput> {
+    const skip = calcularOffset(paginacion);
+
+    const [total, procesos] = await Promise.all([
+      this.prisma.procesos.count(),
+      this.prisma.procesos.findMany({
+        select: {
+          id: true,
+          codigo: true,
+          estado: true,
+          tipo_proceso: {
+            select: {
+              codigo: true,
+              nombre: true,
+              requiere_autorizacion: true,
+            },
+          },
+          movimientos: {
+            select: { bien_id: true },
+          },
+        },
+        orderBy: [{ codigo: 'desc' }],
+        skip,
+        take: paginacion.porPagina,
+      }),
+    ]);
+
+    const datos = procesos.map((proceso) => ({
+      id: proceso.id,
+      codigo: proceso.codigo,
+      tipo: {
+        codigo: proceso.tipo_proceso.codigo,
+        nombre: proceso.tipo_proceso.nombre,
+      },
+      bienes: new Set(
+        proceso.movimientos.map((movimiento) => movimiento.bien_id),
+      ).size,
+      movimientos: proceso.movimientos.length,
+      estado: proceso.estado,
+      requiere_autorizacion: proceso.tipo_proceso.requiere_autorizacion,
     }));
 
     return crearPaginaOutput(datos, total, paginacion);
