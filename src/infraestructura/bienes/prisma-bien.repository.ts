@@ -75,6 +75,7 @@ export class PrismaBienRepository implements BienRepository {
           padre_id: true,
           numero: true,
           descripcion: true,
+          patrimonial: true,
           estado: true,
           atributos: true,
           codificador: {
@@ -111,6 +112,8 @@ export class PrismaBienRepository implements BienRepository {
       ),
       descripcion: bien.descripcion,
       codificador: bien.codificador.codigo,
+      clase: bien.codificador.clase,
+      patrimonial: bien.patrimonial,
       unidad: bien.unidad.nombre,
       responsable: bien.responsable.nombre_completo,
       estado: ESTADO_BIEN_LABEL[bien.estado] ?? bien.estado,

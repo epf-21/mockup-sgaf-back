@@ -5,6 +5,8 @@ export interface BienResumenOutput {
   codigo: string;
   descripcion: string;
   codificador: string;
+  clase: 'activo' | 'material';
+  patrimonial: boolean;
   unidad: string;
   responsable: string;
   estado: string;
