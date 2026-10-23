@@ -3,6 +3,7 @@ import type {
   DatosProcesoWorkflow,
 } from '../../../dominio/procesos/tipos/proceso';
 import type { NuevoProceso } from '../tipos/proceso';
+import type { ListarProcesosInput } from '../input/listar-procesos.input';
 import type { Paginacion } from '../../comun/paginacion/paginacion';
 import type { CrearProcesoOutput } from '../output/crear-proceso.output';
 import type { ListarProcesosOutput } from '../output/listar-procesos.output';
@@ -12,7 +13,7 @@ import type { ObtenerProcesoOutput } from '../output/obtener-proceso.output';
 export abstract class ProcesoRepository {
   abstract crear(proceso: NuevoProceso): Promise<CrearProcesoOutput>;
   abstract listarPaginado(
-    paginacion: Paginacion,
+    input: ListarProcesosInput,
   ): Promise<ListarProcesosOutput>;
   abstract listarResumen(
     paginacion: Paginacion,

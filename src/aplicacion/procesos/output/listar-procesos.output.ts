@@ -7,9 +7,7 @@ export interface ProcesoResumenOutput {
     codigo: string;
     nombre: string;
   };
-  unidad_origen: string | null;
-  unidad_destino: string | null;
-  bienes: number;
+  destino: string | null;
   estado: string;
 }
 

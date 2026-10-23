@@ -18,6 +18,7 @@ import {
   calcularOffset,
   crearPaginaOutput,
 } from '../../aplicacion/comun/paginacion/paginacion';
+import type { ListarProcesosInput } from '../../aplicacion/procesos/input/listar-procesos.input';
 import type { CrearProcesoOutput } from '../../aplicacion/procesos/output/crear-proceso.output';
 import type { ListarProcesosOutput } from '../../aplicacion/procesos/output/listar-procesos.output';
 import type { ListarProcesosResumenOutput } from '../../aplicacion/procesos/output/listar-procesos-resumen.output';
@@ -87,12 +88,31 @@ export class PrismaProcesoRepository implements ProcesoRepository {
     });
   }
 
-  async listarPaginado(paginacion: Paginacion): Promise<ListarProcesosOutput> {
-    const skip = calcularOffset(paginacion);
+  async listarPaginado(
+    input: ListarProcesosInput,
+  ): Promise<ListarProcesosOutput> {
+    const skip = calcularOffset(input.paginacion);
+    const where: Prisma.procesosWhereInput = {};
+
+    if (input.categoria) {
+      where.tipo_proceso = { categoria: input.categoria as never };
+    }
+    if (input.tipoProcesoId) {
+      where.tipo_proceso_id = input.tipoProcesoId;
+    }
+    if (input.estado) {
+      where.estado = input.estado as never;
+    }
+    if (input.unidadDestinoId) {
+      where.movimientos = {
+        some: { unidad_destino_id: input.unidadDestinoId },
+      };
+    }
 
     const [total, procesos] = await Promise.all([
-      this.prisma.procesos.count(),
+      this.prisma.procesos.count({ where }),
       this.prisma.procesos.findMany({
+        where,
         select: {
           id: true,
           codigo: true,
@@ -107,17 +127,13 @@ export class PrismaProcesoRepository implements ProcesoRepository {
             take: 1,
             orderBy: { id: 'asc' },
             select: {
-              unidad_origen: { select: { nombre: true } },
               unidad_destino: { select: { nombre: true } },
             },
-          },
-          _count: {
-            select: { movimientos: true },
           },
         },
         orderBy: [{ codigo: 'desc' }],
         skip,
-        take: paginacion.porPagina,
+        take: input.paginacion.porPagina,
       }),
     ]);
 
@@ -128,13 +144,11 @@ export class PrismaProcesoRepository implements ProcesoRepository {
         codigo: proceso.tipo_proceso.codigo,
         nombre: proceso.tipo_proceso.nombre,
       },
-      unidad_origen: proceso.movimientos[0]?.unidad_origen?.nombre ?? null,
-      unidad_destino: proceso.movimientos[0]?.unidad_destino?.nombre ?? null,
-      bienes: proceso._count.movimientos,
+      destino: proceso.movimientos[0]?.unidad_destino?.nombre ?? null,
       estado: proceso.estado,
     }));
 
-    return crearPaginaOutput(datos, total, paginacion);
+    return crearPaginaOutput(datos, total, input.paginacion);
   }
 
   async listarResumen(

@@ -38,9 +38,7 @@ export class ProcesosController {
 
   @Get()
   getProcesos(@Query() query: ListarProcesosQuery) {
-    return this.listarProcesos.execute(
-      ListarProcesosMapper.toPaginacion(query),
-    );
+    return this.listarProcesos.execute(ListarProcesosMapper.toInput(query));
   }
 
   @Get('resumen')
